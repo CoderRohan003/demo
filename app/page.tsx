@@ -36,7 +36,14 @@ import schoolI4 from "@/public/MISE/image4.jpg";
 import schoolI5 from "@/public/MISE/image5.jpg";
 import { FullPageLoader } from "./components/FullPageLoader";
 
-const backgroundImages = [schoolI1, schoolI2, schoolI3, schoolI4, schoolI5];
+const backgroundImages = [
+  "/MISE/image1.JPG",
+  "/MISE/image2.JPG",
+  "/MISE/image3.JPG",
+  "/MISE/image4.JPG",
+  "/MISE/image5.JPG",
+];
+
 
 // Type for the course data
 interface Course {
@@ -125,18 +132,20 @@ export default function LandingPage() {
       <section className="relative min-h-screen overflow-hidden bg-gray-900">
         {/* Background Carousel */}
         <div className="absolute inset-0 z-0">
-          {backgroundImages.map((image, index) => (
-            <Image
-              key={index}
-              src={image}
-              alt={`School campus ${index + 1}`}
-              fill
-              priority={index === 0}
-              className={`absolute inset-0 object-cover transition-opacity duration-1000 ${index === currentBg ? "opacity-30" : "opacity-0"
-                }`}
-            />
-          ))}
-        </div>
+  {backgroundImages.map((src, index) => (
+    <Image
+      key={index}
+      src={src}
+      alt={`School campus ${index + 1}`}
+      fill
+      priority={index === 0}
+      className={`absolute inset-0 object-cover transition-opacity duration-1000 ${
+        index === currentBg ? "opacity-30" : "opacity-0"
+      }`}
+    />
+  ))}
+</div>
+
 
         {/* Foreground Content */}
         <div className="relative z-10 p-4 flex flex-col min-h-screen">
