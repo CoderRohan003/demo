@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext';
 import { databases } from '@/lib/appwrite';
 import { Mail, Edit, Save, X, Camera } from 'lucide-react';
 import ImageCropperModal from '@/utilities/ImageCropperModal';
-import Image from 'next/image';
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const PROFILES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_SUPER_ADMIN_PROFILES_COLLECTION_ID!;
@@ -112,7 +111,7 @@ const SuperAdminProfile = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-6">
                     <div className="relative">
-                        <Image
+                        <img
                             src={avatarPreview || (profile?.avatarS3Key ? `/api/avatar-view?s3Key=${profile.avatarS3Key}` : '/no-dp.png')}
                             alt="Profile Picture"
                             width={128}

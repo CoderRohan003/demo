@@ -1,253 +1,224 @@
-"use client";
+// 'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import {
-  Home,
-  BookOpen,
-  Layers,
-  Shield,
-  Cpu,
-  UserCog,
-  ChevronsLeft,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Megaphone,
-  BookCopy,
-} from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+// import { useState } from 'react';
+// import Link from 'next/link';
+// import { 
+//   Home, BookOpen, Layers, Shield, Cpu, UserCog,
+//   ChevronDown, ChevronUp, X
+// } from 'lucide-react';
+// import { useAuth } from '@/context/AuthContext';
 
-// =======================================================================
-// NavItem Sub-component: A reusable component for each navigation link
-// =======================================================================
-type NavItemProps = {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  isCollapsed: boolean;
-  isActive: boolean;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  notificationCount?: number;
-};
+// type SidebarProps = {
+//   isSidebarOpen: boolean;
+//   setIsSidebarOpen: (open: boolean) => void;
+// };
 
-const NavItem = ({ href, icon, label, isCollapsed, isActive, onClick, notificationCount }: NavItemProps) => (
-  <Link
-    href={href}
-    onClick={onClick}
-    className={`
-      relative flex items-center p-2.5 my-1 rounded-lg transition-colors duration-200
-      ${isActive
-        ? 'bg-blue-100 dark:bg-gray-700 text-blue-600 dark:text-blue-300 font-semibold'
-        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-      }
-    `}
-  >
-    {/* Active link indicator bar */}
-    <div className={`
-      absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r-full
-      transition-transform duration-300 ease-in-out
-      ${isActive ? 'scale-y-100' : 'scale-y-0'}
-    `}></div>
+// const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
+//   const { profile } = useAuth();
+//   const [isClassesOpen, setIsClassesOpen] = useState(false);
 
-    {icon}
+//   return (
+//     <aside 
+//       className={`
+//         fixed top-0 left-0 h-screen 
+//         bg-gradient-to-b from-orange-400 via-yellow-300 to-yellow-100 
+//         dark:from-gray-900 dark:via-purple-800 dark:to-purple-950
+//         text-gray-900 dark:text-white flex flex-col shadow-xl 
+//         transition-transform duration-300 ease-in-out z-40 
+//         w-64
+//         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+//         lg:translate-x-0 lg:w-64
+//       `}
+//     >
+//       {/* Header */}
+//       <div className="flex items-center justify-between p-4 mb-6 border-b border-black dark:border-white/35">
+//         <span className="text-2xl font-bold text-white drop-shadow-lg">MISE Education</span>
+//         <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 lg:hidden transition-colors">
+//           <X />
+//         </button>
+//       </div>
 
-    <span className={`
-      ml-4 whitespace-nowrap transition-opacity duration-200
-      ${isCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-100'}
-    `}>
-      {label}
-    </span>
+//       {/* Navigation */}
+//       <nav className="flex-grow px-4 flex flex-col space-y-2">
+//         {profile?.role === 'student' && (
+//           <Link 
+//             href="/home" 
+//             className="flex items-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 transition-colors hover:translate-x-1 duration-200"
+//           >
+//             <Home className="mr-3" />
+//             Home
+//           </Link>
+//         )}
+        
+//         <div>
+//           <button
+//             onClick={() => setIsClassesOpen(!isClassesOpen)}
+//             className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 transition-colors hover:translate-x-1 duration-200"
+//           >
+//             <div className="flex items-center">
+//               <BookOpen className="mr-3" />
+//               Academic Classes
+//             </div>
+//             {isClassesOpen ? <ChevronUp /> : <ChevronDown />}
+//           </button>
+//           {isClassesOpen && (
+//             <div className="pl-8 mt-2 flex flex-col space-y-2">
+//               {[6, 7, 8, 9, 10, 11, 12].map(cls => (
+//                 <Link 
+//                   key={cls} 
+//                   href={`/class/${cls}`} 
+//                   className="p-1 rounded hover:bg-white/30 dark:hover:bg-purple-700 transition-colors hover:text-orange-400 dark:hover:text-yellow-300"
+//                 >
+//                   Class {cls}
+//                 </Link>
+//               ))}
+//             </div>
+//           )}
+//         </div>
+        
+//         <Link href="/coding-ai" className="flex items-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-purple-700 transition-colors hover:translate-x-1 duration-200">
+//           <Cpu className="mr-3" />
+//           Coding & AI
+//         </Link>
 
-    {/* Notification Badge */}
-    {notificationCount && notificationCount > 0 && (
-       <span className={`
-        ml-auto text-xs font-bold text-white bg-red-500 rounded-full
-        flex items-center justify-center transition-all duration-200
-        ${isCollapsed ? 'h-5 w-5' : 'h-6 w-6'}
-        ${isCollapsed ? 'absolute top-1 left-[2.1rem]' : ''}
-       `}>
-         {notificationCount > 9 ? '9+' : notificationCount}
-       </span>
-    )}
-  </Link>
-);
+//         {(profile?.role === 'student' || profile?.role === 'teacher') && (
+//           <Link href="/batches" className="flex items-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-purple-700 transition-colors hover:translate-x-1 duration-200">
+//             <Layers className="mr-3" />
+//             My Batches
+//           </Link>
+//         )}
+
+//         {profile?.role === 'teacher' && (
+//           <Link href="/admin/upload" className="flex items-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-purple-700 transition-colors hover:translate-x-1 duration-200">
+//             <Shield className="mr-3" />
+//             Admin Panel
+//           </Link>
+//         )}
+
+//         {profile?.role === 'super-admin' && (
+//           <Link href="/super-admin" className="flex items-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-purple-700 transition-colors hover:translate-x-1 duration-200">
+//             <UserCog className="mr-3" />
+//             Super Admin
+//           </Link>
+//         )}
+//       </nav>
+
+//       {/* Footer */}
+//       <div className="p-4 mt-auto text-white/70 dark:text-gray-400 text-sm">
+//         © 2025 mise.org.in
+//       </div>
+//     </aside>
+//   );
+// };
+
+// export default Sidebar;
 
 
-// =======================================================================
-// Main Sidebar Component
-// =======================================================================
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { 
+  Home, BookOpen, Layers, Shield, Cpu, UserCog,
+  ChevronsLeft, ChevronsRight, ChevronDown, ChevronUp, X
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+
 type SidebarProps = {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
-  isSidebarCollapsed: boolean;
-  setIsSidebarCollapsed: (collapsed: boolean) => void;
 };
 
-const Sidebar = ({
-  isSidebarOpen,
-  setIsSidebarOpen,
-  isSidebarCollapsed,
-  setIsSidebarCollapsed,
-}: SidebarProps) => {
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   const { profile } = useAuth();
-  const pathname = usePathname();
-
-  const isClassesPathActive = pathname.startsWith("/class/");
-  const [isClassesOpen, setIsClassesOpen] = useState(isClassesPathActive);
-
-  const iconClass = "flex-shrink-0 w-6 h-6";
-
-  const handleSidebarClick = () => {
-    if (isSidebarCollapsed) {
-      setIsSidebarCollapsed(false);
-    }
-  };
-
-  const stopPropagation = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-  };
+  const [isClassesOpen, setIsClassesOpen] = useState(false);
 
   return (
-    <aside
-      onClick={handleSidebarClick}
+    // Responsive positioning and transitions
+    <aside 
       className={`
-        fixed top-0 left-0 h-screen bg-white dark:bg-gray-900 
-        text-gray-900 dark:text-white flex flex-col shadow-2xl 
-        transition-all duration-300 ease-in-out z-40 
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0 
-        ${isSidebarCollapsed ? "lg:w-20" : "lg:w-64"}
-        ${isSidebarCollapsed ? "cursor-pointer" : ""}
+        fixed top-0 left-0 h-screen bg-white dark:bg-gray-800 
+        text-gray-900 dark:text-white flex flex-col shadow-lg 
+        transition-transform duration-300 ease-in-out z-40 
+        w-64 
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:w-64
       `}
     >
-      {/* --- Header with Logo and Title --- */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-[65px] overflow-hidden">
-        <div className="flex items-center gap-2">
-          {/* Logo: Only visible when collapsed on desktop */}
-          <Image
-            src="/favicon.ico"
-            alt="Mise Logo"
-            width={32}
-            height={32}
-            className={`flex-shrink-0 transition-all duration-300 ${
-              isSidebarCollapsed ? "lg:opacity-100" : "lg:opacity-0 lg:w-0"
-            }`}
-          />
-          {/* Title: Only visible when expanded */}
-          <span
-            className={`text-2xl font-bold whitespace-nowrap transition-opacity duration-200 ${
-              isSidebarCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            MISE Education
-          </span>
-        </div>
-
-        <div className="flex items-center">
-          <button onClick={(e) => { stopPropagation(e); setIsSidebarCollapsed(!isSidebarCollapsed); }} className="hidden lg:block p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
-            <ChevronsLeft className={`transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} />
-          </button>
-          <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 lg:hidden">
-            <X />
-          </button>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 mb-6 border-b border-gray-200 dark:border-gray-700">
+        <span className="text-2xl font-bold">MISE Education</span>
+        {/* Close button for mobile */}
+        <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 lg:hidden">
+          <X />
+        </button>
       </div>
 
-
       {/* Navigation */}
-      <nav className="flex-grow px-2 py-4 flex flex-col overflow-y-auto">
-        {profile?.role === "student" && (
-          <>
-            <NavItem href="/home" icon={<Home className={iconClass} />} label="Home" isCollapsed={isSidebarCollapsed} isActive={pathname === '/home'} onClick={stopPropagation} />
-            <NavItem href="/library" icon={<BookCopy className={iconClass} />} label="Library" isCollapsed={isSidebarCollapsed} isActive={pathname === '/library'} onClick={stopPropagation} />
-          </>
+      <nav className="flex-grow px-4 flex flex-col space-y-2">
+        {profile?.role === 'student' && (
+          <Link href="/home" className="flex items-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <Home className="mr-3" />
+            Home
+          </Link>
         )}
-
-        <NavItem 
-          href="/announcements" 
-          icon={<Megaphone className={iconClass} />} 
-          label="Announcements" 
-          isCollapsed={isSidebarCollapsed} 
-          isActive={pathname === '/announcements'} 
-          onClick={stopPropagation} 
-        />
-
-        {/* Academic Classes Dropdown */}
-        <div className="relative">
-          {isClassesOpen && !isSidebarCollapsed && (
-            <div className="absolute left-8 top-14 w-px bg-gray-300 dark:bg-gray-600 h-[calc(100%-4.5rem)]"></div>
-          )}
-
+        
+        <div>
           <button
-            onClick={(e) => { stopPropagation(e); if (!isSidebarCollapsed) setIsClassesOpen(!isClassesOpen); }}
-            className={`
-              w-full flex items-center justify-between p-2.5 my-1 rounded-lg transition-colors duration-200
-              ${isClassesPathActive
-                ? 'bg-blue-100 dark:bg-gray-700 text-blue-600 dark:text-blue-300 font-semibold'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-              }
-              ${isSidebarCollapsed ? 'cursor-default' : ''}
-            `}
+            onClick={() => setIsClassesOpen(!isClassesOpen)}
+            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
             <div className="flex items-center">
-                <BookOpen className={iconClass} />
-                <span className={`ml-4 whitespace-nowrap transition-opacity duration-200 ${isSidebarCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-100'}`}>
-                    Academic Classes
-                </span>
+              <BookOpen className="mr-3" />
+              Academic Classes
             </div>
-            <div className={`transition-opacity duration-200 ${isSidebarCollapsed ? 'lg:opacity-0 lg:hidden' : ''}`}>
-                {isClassesOpen ? <ChevronUp /> : <ChevronDown />}
-            </div>
+            {isClassesOpen ? <ChevronUp /> : <ChevronDown />}
           </button>
-          {isClassesOpen && !isSidebarCollapsed && (
-            <div className="pl-8 mt-2 flex flex-col space-y-1">
-              {[6, 7, 8, 9, 10, 11, 12].map((cls) => (
-                <Link
-                  key={cls}
-                  href={`/class/${cls}`}
-                  onClick={stopPropagation}
-                  className={`
-                    relative p-1.5 rounded-md text-sm transition-colors
-                    ${pathname === `/class/${cls}`
-                      ? 'text-blue-600 dark:text-blue-300 font-bold'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-                    }
-                  `}
-                >
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-4 bg-gray-300 dark:bg-gray-600"></div>
-                  <span className="ml-5">Class {cls}</span>
+          {isClassesOpen && (
+            <div className="pl-8 mt-2 flex flex-col space-y-2">
+              {[6, 7, 8, 9, 10, 11, 12].map(cls => (
+                <Link key={cls} href={`/class/${cls}`} className="p-1 hover:text-blue-500 dark:hover:text-blue-400">
+                  Class {cls}
                 </Link>
               ))}
             </div>
           )}
         </div>
+        
+        <Link href="/coding-ai" className="flex items-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+          <Cpu className="mr-3" />
+          Coding & AI
+        </Link>
 
-        <NavItem href="/coding-ai" icon={<Cpu className={iconClass} />} label="Coding & AI" isCollapsed={isSidebarCollapsed} isActive={pathname === '/coding-ai'} onClick={stopPropagation} />
-
-        {(profile?.role === "student" || profile?.role === "teacher") && (
-          <NavItem href="/batches" icon={<Layers className={iconClass} />} label="My Batches" isCollapsed={isSidebarCollapsed} isActive={pathname === '/batches'} onClick={stopPropagation} />
+        {(profile?.role === 'student' || profile?.role === 'teacher') && (
+          <Link href="/batches" className="flex items-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <Layers className="mr-3" />
+            My Batches
+          </Link>
         )}
 
-        {profile?.role === "teacher" && (
-          <NavItem href="/admin/upload" icon={<Shield className={iconClass} />} label="Admin Panel" isCollapsed={isSidebarCollapsed} isActive={pathname.startsWith('/admin')} onClick={stopPropagation} />
+        {profile?.role === 'teacher' && (
+          <Link href="/admin/upload" className="flex items-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <Shield className="mr-3" />
+            Admin Panel
+          </Link>
         )}
 
-        {profile?.role === "super-admin" && (
-          <NavItem href="/super-admin" icon={<UserCog className={iconClass} />} label="Super Admin" isCollapsed={isSidebarCollapsed} isActive={pathname.startsWith('/super-admin')} onClick={stopPropagation} />
+        {profile?.role === 'super-admin' && (
+          <Link href="/super-admin" className="flex items-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <UserCog className="mr-3" />
+            Super Admin
+          </Link>
         )}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 mt-auto border-t border-gray-200 dark:border-gray-700">
-        <div className={`text-center transition-opacity duration-200 ${isSidebarCollapsed ? "lg:opacity-0 lg:hidden" : ""}`}>
-             <p className="text-sm text-gray-400 dark:text-gray-500">© 2025 mise.org.in</p>
-        </div>
+      <div className="p-4 mt-auto">
+        <p className="text-sm text-gray-400 dark:text-gray-500">© 2025 mise.org.in</p>
       </div>
     </aside>
   );
 };
 
 export default Sidebar;
+

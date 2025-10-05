@@ -5,20 +5,6 @@ import { useRouter } from 'next/navigation';
 import withSuperAdminAuth from '@/app/components/auth/withSuperAdminAuth';
 import Image from 'next/image';
 
-interface BatchData {
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    duration: string;
-    imageUrl: string;
-    subjects: string[];
-    faculty: string[];
-    features: string[];
-    targetClasses?: number[];
-    level?: string;
-}
-
 const CreateBatchPage = () => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +57,7 @@ const CreateBatchPage = () => {
                 imageUrl = key;
             }
 
-            const finalBatchData: Partial<BatchData> = {
+            const finalBatchData: any = {
                 name: formData.name,
                 description: formData.description,
                 price: formData.price,

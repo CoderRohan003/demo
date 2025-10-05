@@ -28,17 +28,14 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 
 // Images
 import schoolLogo from "@/public/logo.webp";
-import miseLogo from "@/public/miselogo.png";
+import schoolI1 from "@/public/MISE/image1.jpg";
+import schoolI2 from "@/public/MISE/image2.jpg";
+import schoolI3 from "@/public/MISE/image3.jpg";
+import schoolI4 from "@/public/MISE/image4.jpg";
+import schoolI5 from "@/public/MISE/image5.jpg";
 import { FullPageLoader } from "./components/FullPageLoader";
 
-const backgroundImages = [
-  "/MISE/image1.JPG",
-  "/MISE/image2.JPG",
-  "/MISE/image3.JPG",
-  "/MISE/image4.JPG",
-  "/MISE/image5.JPG",
-];
-
+const backgroundImages = [schoolI1, schoolI2, schoolI3, schoolI4, schoolI5];
 
 // Type for the course data
 interface Course {
@@ -127,20 +124,18 @@ export default function LandingPage() {
       <section className="relative min-h-screen overflow-hidden bg-gray-900">
         {/* Background Carousel */}
         <div className="absolute inset-0 z-0">
-  {backgroundImages.map((src, index) => (
-    <Image
-      key={index}
-      src={src}
-      alt={`School campus ${index + 1}`}
-      fill
-      priority={index === 0}
-      className={`absolute inset-0 object-cover transition-opacity duration-1000 ${
-        index === currentBg ? "opacity-30" : "opacity-0"
-      }`}
-    />
-  ))}
-</div>
-
+          {backgroundImages.map((image, index) => (
+            <Image
+              key={index}
+              src={image}
+              alt={`School campus ${index + 1}`}
+              fill
+              priority={index === 0}
+              className={`absolute inset-0 object-cover transition-opacity duration-1000 ${index === currentBg ? "opacity-30" : "opacity-0"
+                }`}
+            />
+          ))}
+        </div>
 
         {/* Foreground Content */}
         <div className="relative z-10 p-4 flex flex-col min-h-screen">
@@ -148,7 +143,7 @@ export default function LandingPage() {
             <span className="bg-white">
               <Image src={schoolLogo} alt="MISE Logo" width={300} height={200} />
             </span>
-            <Image src={miseLogo} alt="MISE Logo" width={250} height={250} className="rounded-full" />
+            <Image src={schoolLogo} alt="MISE Logo" width={100} height={100} className="rounded-full" />
           </header>
 
           <div className="flex-grow flex flex-col items-center justify-center text-center max-w-2xl mx-auto py-20 md:py-32 px-4">

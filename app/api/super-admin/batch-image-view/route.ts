@@ -1,7 +1,6 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { Readable } from "stream";
 
 const s3Client = new S3Client({
   region: process.env.AWS_S3_REGION!,
@@ -12,17 +11,7 @@ const s3Client = new S3Client({
 });
 
 // Using the avatar bucket, as configured in the batch image upload route
-const BUCKET_NAME = process.env.AWS_S3_AVATAR_BUCKET_NAME!;
-
-function nodeStreamToWeb(stream: Readable): ReadableStream<Uint8Array> {
-  return new ReadableStream({
-    start(controller) {
-      stream.on("data", (chunk) => controller.enqueue(new Uint8Array(chunk)));
-      stream.on("end", () => controller.close());
-      stream.on("error", (err) => controller.error(err));
-    },
-  });
-}
+const BUCKET_NAME = process.env.AWS_S3_AVATAR_BUCKET_NAME!; 
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -45,15 +34,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Stream the image data directly back to the client
-    const body: ReadableStream | Blob | string = s3Response.Body instanceof Readable
-      ? nodeStreamToWeb(s3Response.Body)
-      : (s3Response.Body as ReadableStream | Blob | string);
-
-    return new NextResponse(body, {
+    return new NextResponse(s3Response.Body as any, {
       status: 200,
       headers: {
         "Content-Type": s3Response.ContentType || "application/octet-stream",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "public, max-age=31536000, immutable", // Cache for a year
       },
     });
 

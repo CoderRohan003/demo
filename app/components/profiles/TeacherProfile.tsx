@@ -3,9 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { databases } from '@/lib/appwrite';
-import { Edit, Save, X, Camera, Book, Award, Briefcase } from 'lucide-react';
+import { User, Mail, Edit, Save, X, Camera, Book, Award, Briefcase } from 'lucide-react';
 import ImageCropperModal from '@/utilities/ImageCropperModal';
-import Image from 'next/image';
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const PROFILES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_TEACHER_PROFILES_COLLECTION_ID!;
@@ -121,7 +120,7 @@ const TeacherProfile = () => {
                 onCropComplete={handleCropComplete}
             />
             <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-t-lg relative flex items-center justify-center">
-                <Image
+                <img
                     width={700}
                     height={150}
                     src="/logo.webp"
@@ -132,7 +131,7 @@ const TeacherProfile = () => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-b-lg shadow-md border-x border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-end -mt-20">
                     <div className="relative">
-                        <Image
+                        <img
                             src={avatarPreview || (profile?.avatarS3Key ? `/api/avatar-view?s3Key=${profile.avatarS3Key}` : '/no-dp.png')}
                             alt="Profile Picture"
                             width={128}

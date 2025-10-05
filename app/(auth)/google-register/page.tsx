@@ -83,12 +83,8 @@ const CompleteGoogleRegistrationPage = () => {
             await refetchProfile();
             router.push('/home');
 
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message || 'An error occurred while creating your profile.');
-            } else {
-                setError('An unexpected error occurred.');
-            }
+        } catch (err: any) {
+            setError(err.message || 'An error occurred while creating your profile.');
         } finally {
             setIsLoading(false);
         }

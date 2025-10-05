@@ -7,10 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 import { databases } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
-import {
-  CheckCircle,
-  Clock,
-  Users,
+import { 
+  CheckCircle, 
+  Clock, 
+  Users, 
   Award,
   ArrowLeft,
   Download,
@@ -43,7 +43,7 @@ declare global {
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
-const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
+const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_ENROLLMENTS_COLLECTION_ID!;
 
 interface Batch {
   $id: string; name: string; description: string; imageUrl?: string; price: number;
@@ -167,14 +167,14 @@ const BatchDetailPage = () => {
             {/* Hero Section */}
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden">
               <div className="relative h-80">
-                <Image
-                  src={batch.imageUrl ? `/api/super-admin/batch-image-view?s3Key=${batch.imageUrl}` : "/no-dp.png"}
-                  alt={batch.name}
-                  layout="fill"
+                <Image 
+                  src={batch.imageUrl ? `/api/super-admin/batch-image-view?s3Key=${batch.imageUrl}` : "/no-dp.png"} 
+                  alt={batch.name} 
+                  layout="fill" 
                   objectFit="cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-
+                
                 <div className="absolute top-6 left-6">
                   <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium">
                     <Zap className="w-4 h-4" />
@@ -229,12 +229,12 @@ const BatchDetailPage = () => {
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
-                What You&apos;ll Get
+                What You'll Get
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {batch.features.map((feature, i) => (
-                  <div
-                    key={i}
+                  <div 
+                    key={i} 
                     className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors group"
                   >
                     <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/40 transition-colors">
