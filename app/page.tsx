@@ -28,14 +28,16 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 
 // Images
 import schoolLogo from "@/public/logo.webp";
-import schoolI1 from "@/public/MISE/image1.jpg";
-import schoolI2 from "@/public/MISE/image2.jpg";
-import schoolI3 from "@/public/MISE/image3.jpg";
-import schoolI4 from "@/public/MISE/image4.jpg";
-import schoolI5 from "@/public/MISE/image5.jpg";
+
 import { FullPageLoader } from "./components/FullPageLoader";
 
-const backgroundImages = [schoolI1, schoolI2, schoolI3, schoolI4, schoolI5];
+const backgroundImages = [
+  "/MISE/image1.JPG",
+  "/MISE/image2.JPG",
+  "/MISE/image3.JPG",
+  "/MISE/image4.JPG",
+  "/MISE/image5.JPG",
+];
 
 // Type for the course data
 interface Course {
@@ -124,10 +126,10 @@ export default function LandingPage() {
       <section className="relative min-h-screen overflow-hidden bg-gray-900">
         {/* Background Carousel */}
         <div className="absolute inset-0 z-0">
-          {backgroundImages.map((image, index) => (
+          {backgroundImages.map((src, index) => (
             <Image
               key={index}
-              src={image}
+              src={src}
               alt={`School campus ${index + 1}`}
               fill
               priority={index === 0}
@@ -136,6 +138,7 @@ export default function LandingPage() {
             />
           ))}
         </div>
+
 
         {/* Foreground Content */}
         <div className="relative z-10 p-4 flex flex-col min-h-screen">
