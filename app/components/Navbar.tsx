@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { ThemeToggleButton as PCThemeToggleButton } from './ThemeToggleButton';
-import { ThemeToggleButton as MobileThemeToggleButton } from './ThemeToggleButtonMobile';
+import { ThemeToggleButtonMobile as MobileThemeToggleButton } from './ThemeToggleButtonMobile';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { databases } from '@/lib/appwrite';
 import { Query } from 'appwrite';
