@@ -29,11 +29,6 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 // Images
 import schoolLogo from "@/public/logo.webp";
 import miseLogo from "@/public/miselogo.png";
-import schoolI1 from "@/public/MISE/image1.jpg";
-import schoolI2 from "@/public/MISE/image2.jpg";
-import schoolI3 from "@/public/MISE/image3.jpg";
-import schoolI4 from "@/public/MISE/image4.jpg";
-import schoolI5 from "@/public/MISE/image5.jpg";
 import { FullPageLoader } from "./components/FullPageLoader";
 
 const backgroundImages = [
