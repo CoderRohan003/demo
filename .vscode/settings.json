@@ -1,0 +1,14 @@
+{
+    "restoreTerminals.terminals": [
+        {
+            "splitTerminals": [
+                {
+                    "name": "next",
+                    "commands": [
+                        "npm run dev"
+                    ]
+                }
+            ]
+        }
+    ]
+}

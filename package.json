@@ -1,0 +1,41 @@
+{
+  "name": "onlinelearningplatform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/s3-request-presigner": "^3.864.0",
+    "@headlessui/react": "^2.2.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "appwrite": "^18.2.0",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.539.0",
+    "next": "15.4.6",
+    "next-themes": "^0.4.6",
+    "node-appwrite": "^18.0.0",
+    "radix-ui": "^1.4.3",
+    "razorpay": "^2.9.6",
+    "react": "19.1.0",
+    "react-day-picker": "^9.8.1",
+    "react-dom": "19.1.0",
+    "react-image-crop": "^11.0.10",
+    "react-player": "^3.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
