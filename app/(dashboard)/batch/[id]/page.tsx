@@ -229,7 +229,7 @@ const BatchDetailPage = () => {
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
-                What You'll Get
+                What You&apos;ll Get
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {batch.features.map((feature, i) => (

@@ -98,10 +98,11 @@ export async function POST(request: Request) {
       message: "Teacher added to team.",
       membership,
     });
-  } catch (error: any) {
-    console.error("❌ Error adding teacher to team:", error?.message || error);
+  } catch (error: unknown) { // ✅ FIX: Changed 'any' to 'unknown'
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error("❌ Error adding teacher to team:", message);
     return NextResponse.json(
-      { error: "Failed to add teacher to team", details: error?.message },
+      { error: "Failed to add teacher to team", details: message },
       { status: 500 }
     );
   }

@@ -339,6 +339,8 @@ interface Announcement {
     $createdAt: string;
 }
 
+type FilterType = 'all' | 'global' | 'batch';
+
 const AnnouncementsPage = () => {
     const { user } = useAuth();
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -476,7 +478,7 @@ const AnnouncementsPage = () => {
                             ].map(({ key, label, icon: Icon }) => (
                                 <button
                                     key={key}
-                                    onClick={() => setFilter(key as any)}
+                                    onClick={() => setFilter(key as FilterType)}
                                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors border ${
                                         filter === key
                                             ? 'bg-blue-600 text-white border-blue-600 shadow-md'
