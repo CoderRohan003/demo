@@ -86,7 +86,7 @@ export default function LandingPage() {
         }));
         setCourses(coursesData);
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        console.error("Faiiled to fetch courses:", error);
       } finally {
         setLoadingCourses(false);
       }
