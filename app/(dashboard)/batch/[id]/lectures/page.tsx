@@ -453,7 +453,7 @@ const BatchLecturesPage = () => {
             <div className="mt-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Today's Progress
+                  Today&apos;s Progress
                 </span>
                 <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
                   {completedCount} of {totalLectures} completed
