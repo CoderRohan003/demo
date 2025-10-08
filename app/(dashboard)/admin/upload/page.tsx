@@ -386,7 +386,7 @@ const UploadPage = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
-    let newFormState = { ...formState, [id]: value };
+    const newFormState = { ...formState, [id]: value };
 
     if (id === 'category') {
       const filtered = allBatches.filter(batch => batch.category === value);

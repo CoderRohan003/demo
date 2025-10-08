@@ -186,7 +186,7 @@ const MyBatchesPage = () => {
         No Batches Yet
       </h3>
       <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-8">
-        You haven't enrolled in any batches yet. Start your learning journey by exploring our available courses.
+        You haven&apos;t enrolled in any batches yet. Start your learning journey by exploring our available courses.
       </p>
       <Link 
         href="/batches"

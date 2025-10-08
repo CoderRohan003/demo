@@ -159,7 +159,7 @@ const EmptyState = ({ classId }: { classId: string }) => (
       No Batches Found
     </h3>
     <p className="text-gray-600 dark:text-gray-400 text-center max-w-md leading-relaxed mb-6">
-      We couldn't find any academic batches for Class {classId} at the moment. New batches are added regularly!
+      We couldn&apos;t find any academic batches for Class {classId} at the moment. New batches are added regularly!
     </p>
     
     <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -174,7 +174,7 @@ const EmptyState = ({ classId }: { classId: string }) => (
 );
 
 const StatsCard = ({ icon: Icon, title, value, gradient }: { 
-  icon: any, 
+  icon: React.ElementType, 
   title: string, 
   value: string | number, 
   gradient: string 
