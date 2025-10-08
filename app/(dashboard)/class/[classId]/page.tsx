@@ -310,7 +310,7 @@ const ClassPage = () => {
               {searchTerm && (
                 <div className="mb-6 text-center">
                   <p className="text-gray-600 dark:text-gray-400">
-                    Found <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredBatches.length}</span> batch{filteredBatches.length !== 1 ? 'es' : ''} matching "{searchTerm}"
+                    Found <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredBatches.length}</span> batch{filteredBatches.length !== 1 ? 'es' : ''} matching &quot;{searchTerm}&quot;
                   </p>
                 </div>
               )}
@@ -338,7 +338,7 @@ const ClassPage = () => {
                 No matches found
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                No batches match your search for "{searchTerm}"
+                No batches match your search for &quot;{searchTerm}&quot;
               </p>
               <button
                 onClick={() => setSearchTerm("")}
