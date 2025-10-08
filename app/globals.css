@@ -120,22 +120,29 @@
   }
 } */
 
-
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Example Montserrat font utility class (replace '500' with desired weight if needed) */
+.montserrat-500 {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
 
 /* --- NEW: Master Color Palette Definition --- */
 @layer base {
   :root {
     /* 1. Classic Blue & White (Primary Theme) */
     --background: 248 250 252; /* #F8FAFC - Almost White */
-    --foreground: 15 23 42;    /* #0F172A - Slate Black */
-    --card: 255 255 255;       /* #FFFFFF - White */
+    --foreground: 15 23 42; /* #0F172A - Slate Black */
+    --card: 255 255 255; /* #FFFFFF - White */
     --card-foreground: 15 23 42;
-    --primary: 30 58 138;      /* #1E40AF - Royal Blue */
+    --primary: 30 58 138; /* #1E40AF - Royal Blue */
     --primary-foreground: 249 250 251; /* #F9FAFB - Light Gray */
-    --accent: 96 165 250;      /* #60A5FA - Sky Blue */
-    
+    --accent: 96 165 250; /* #60A5FA - Sky Blue */
+
     /* 2. Purple & Teal (Admin Theme) */
     --admin-primary: 124 58 237; /* #7C3AED - Purple */
     --admin-accent: 20 184 166; /* #14B8A6 - Teal */
@@ -153,22 +160,22 @@
     /* 9. Cyberpunk Neon (Coding/Tech Sections) */
     --neon-pink: 217 70 239; /* #D946EF */
     --neon-cyan: 34 211 238; /* #22D3EE */
-    
+
     /* Borders & Inputs */
     --border: 226 232 240; /* slate-200 */
     --input: 226 232 240; /* slate-200 */
     --muted-foreground: 100 116 139; /* slate-500 */
   }
- 
+
   .dark {
     /* 1. Classic Blue & White (Primary Theme) */
-    --background: 15 23 42;    /* #0F172A - Slate Black */
+    --background: 15 23 42; /* #0F172A - Slate Black */
     --foreground: 249 250 251; /* #F9FAFB - Light Gray */
-    --card: 30 41 59;        /* #1E293B - Slate 800 */
+    --card: 30 41 59; /* #1E293B - Slate 800 */
     --card-foreground: 249 250 251;
-    --primary: 96 165 250;      /* #60A5FA - Sky Blue */
+    --primary: 96 165 250; /* #60A5FA - Sky Blue */
     --primary-foreground: 15 23 42;
-    --accent: 30 58 138;      /* #1E40AF - Royal Blue */
+    --accent: 30 58 138; /* #1E40AF - Royal Blue */
 
     /* 2. Purple & Teal (Admin Theme) */
     --admin-primary: 139 92 246; /* #8B5CF6 - Lighter Purple */
@@ -177,19 +184,19 @@
     /* 3. Coral & Navy (Destructive/Warning) */
     --destructive: 251 146 60; /* #FB923C - Lighter Coral */
     --destructive-foreground: 255 255 255;
-    
+
     /* 4. Mint (Success) */
     --success: 110 231 183; /* #6EE7B7 - Lighter Mint */
-    
+
     /* 8. Nature Green (Price) */
     --price: 74 222 128; /* #4ADE80 - Lighter Green */
-    
+
     /* 9. Cyberpunk Neon (Coding/Tech Sections) */
     /* Neon colors often work well on both themes */
 
     /* Borders & Inputs */
-    --border: 51 65 85;       /* slate-700 */
-    --input: 51 65 85;       /* slate-700 */
+    --border: 51 65 85; /* slate-700 */
+    --input: 51 65 85; /* slate-700 */
     --muted-foreground: 148 163 184; /* slate-400 */
   }
 }
@@ -202,7 +209,6 @@
 }
 /* --- End of New Styles --- */
 
-
 /* Custom styles for react-day-picker */
 :root {
   --rdp-accent-color: rgb(var(--primary));
@@ -211,6 +217,11 @@
   --rdp-today-color: rgb(var(--foreground));
   --rdp-today-bg-color: rgb(var(--border));
   --rdp-selected-color: rgb(var(--primary-foreground));
+}
+
+ /* Hide Next.js dev overlay */
+[data-nextjs-dev-overlay] {
+  display: none !important;
 }
 
 .rdp {
@@ -240,7 +251,6 @@
   color: var(--rdp-selected-color) !important;
 }
 
-
 /* Hide scrollbars utility */
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
@@ -254,8 +264,12 @@
 
 /* Scrolling animation */
 @keyframes scrolling {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-scrolling {
@@ -268,26 +282,30 @@
 
 /* Keyframes for rotation */
 @keyframes rotate360 {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Planet Loader */
 .planet-spinner {
   position: relative;
-  width: 240px;  
-  height: 240px; 
+  width: 240px;
+  height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .planet {
-  width: 120px;   
-  height: 120px;  
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  box-shadow: 0 0 45px rgba(96, 165, 250, 0.7); 
+  box-shadow: 0 0 45px rgba(96, 165, 250, 0.7);
   z-index: 2;
 }
 
@@ -299,17 +317,17 @@
 }
 
 .circular_ring-1 {
-  width: 210px;   
-  height: 210px;  
-  border-width: 9px; 
+  width: 210px;
+  height: 210px;
+  border-width: 9px;
   border-color: #93c5fd transparent #93c5fd transparent;
   animation-duration: 4s;
 }
 
 .circular_ring-2 {
-  width: 240px;   
-  height: 240px;  
-  border-width: 6px; 
+  width: 240px;
+  height: 240px;
+  border-width: 6px;
   border-color: transparent #60a5fa transparent #60a5fa;
   animation-duration: 3s;
   animation-direction: reverse;
@@ -322,12 +340,7 @@
   to {
     transform: rotate(360deg);
   }
-} 
-
-
-
-
-
+}
 
 /* === Single Revolving Light Trail Effect (Hover-Only) === */
 @keyframes rotate {
@@ -349,30 +362,32 @@
 
 .revolving-trail:hover {
   transform: translateY(-0.5rem); /* Lifts the card up */
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 .dark .revolving-trail:hover {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2),
+    0 8px 10px -6px rgb(0 0 0 / 0.2);
 }
 
 /* This is the GLOWING TRAIL with two points of light */
 .revolving-trail::before {
-  content: '';
+  content: "";
   position: absolute;
   z-index: -2; /* Place it behind the mask */
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  
+
   background: conic-gradient(
-    #f472b6, /* Pink */
-    #8b5cf6, /* Purple */
-    #3b82f6, /* Blue */
-    #f472b6  /* Looping back to Pink */
+    #f472b6,
+    /* Pink */ #8b5cf6,
+    /* Purple */ #3b82f6,
+    /* Blue */ #f472b6 /* Looping back to Pink */
   );
-  
+
   animation: rotate 5s linear infinite;
   animation-play-state: paused;
   opacity: 0;
@@ -381,7 +396,7 @@
 
 /* This is the MASK that hides one of the trails */
 .revolving-trail::after {
-  content: '';
+  content: "";
   position: absolute;
   z-index: -1; /* Place it on top of the trail, but behind the content */
   top: -50%;
@@ -393,7 +408,11 @@
   /* This effectively "erases" one half of the glow behind it */
   background: linear-gradient(to right, transparent 50%, #ffffff 50%);
   .dark & {
-    background: linear-gradient(to right, transparent 50%, #0f172a 50%); /* slate-900 */
+    background: linear-gradient(
+      to right,
+      transparent 50%,
+      #0f172a 50%
+    ); /* slate-900 */
   }
 
   animation: rotate 5s linear infinite;
@@ -401,7 +420,6 @@
   opacity: 0;
   transition: opacity 0.4s ease-in-out;
 }
-
 
 /* On hover, make BOTH the trail and the mask visible and start their animations */
 .revolving-trail:hover::before,

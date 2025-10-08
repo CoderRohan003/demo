@@ -45,10 +45,11 @@ export async function POST(request: Request) {
     console.log("✅ Batch created successfully:", newBatch);
 
     return NextResponse.json(newBatch);
-  } catch (error: any) {
-    console.error("❌ Error creating batch:", error?.message || error);
+  } catch (error: unknown) { // ✅ FIX: Changed 'any' to 'unknown'
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error("❌ Error creating batch:", message);
     return NextResponse.json(
-      { error: "Failed to create batch", details: error?.message },
+      { error: "Failed to create batch", details: message },
       { status: 500 }
     );
   }

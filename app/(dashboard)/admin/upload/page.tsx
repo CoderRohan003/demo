@@ -1,3 +1,298 @@
+// 'use client';
+
+// import { useState, useEffect, useRef } from 'react';
+// import { useRouter } from 'next/navigation';
+// import withAdminAuth from '@/app/components/auth/withAdminAuth';
+// import { databases } from '@/lib/appwrite';
+// import { ID, Query } from 'appwrite';
+// import { useAuth } from '@/context/AuthContext';
+// import { PlusCircle, X } from 'lucide-react';
+
+// // Batch interface
+// interface Batch {
+//   $id: string;
+//   name: string;
+//   subjects: string[];
+//   category: string; // "Academic" or "Coding and AI"
+// }
+
+// const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+// const LECTURES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURES_COLLECTION_ID!;
+// const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
+// const LECTURE_RESOURCES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURE_RESOURCES_COLLECTION_ID!;
+// const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
+// const NOTIFICATIONS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_NOTIFICATIONS_COLLECTION_ID!;
+
+// const UploadPage = () => {
+//   const { user } = useAuth();
+//   const router = useRouter();
+//   const resourceInputRef = useRef<HTMLInputElement>(null);
+
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const [successMessage, setSuccessMessage] = useState('');
+
+//   const [allBatches, setAllBatches] = useState<Batch[]>([]);
+//   const [filteredBatches, setFilteredBatches] = useState<Batch[]>([]);
+//   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+
+//   const [formState, setFormState] = useState({
+//     title: '',
+//     subject: '',
+//     lectureDate: '',
+//     videoFile: null as File | null,
+//     description: '',
+//     batchId: '',
+//     category: '',
+//   });
+//   const [resourceFiles, setResourceFiles] = useState<File[]>([]);
+//   const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     const fetchBatches = async () => {
+//       try {
+//         const response = await databases.listDocuments(DATABASE_ID, BATCHES_COLLECTION_ID);
+//         setAllBatches(response.documents as unknown as Batch[]);
+//       } catch (error) {
+//         console.error("Failed to fetch batches:", error);
+//       }
+//     };
+//     fetchBatches();
+//   }, []);
+
+//   const handleInputChange = (
+//     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+//   ) => {
+//     const { id, value } = e.target;
+//     const newFormState = { ...formState, [id]: value };
+
+//     if (id === 'category') {
+//       const filtered = allBatches.filter(batch => batch.category === value);
+//       setFilteredBatches(filtered);
+//       newFormState.batchId = '';
+//       newFormState.subject = '';
+//       setAvailableSubjects([]);
+//     }
+
+//     if (id === 'batchId') {
+//       const selectedBatch = allBatches.find(batch => batch.$id === value);
+//       if (selectedBatch) {
+//         setAvailableSubjects(selectedBatch.subjects || []);
+//       } else {
+//         setAvailableSubjects([]);
+//       }
+//       newFormState.subject = '';
+//     }
+
+//     setFormState(newFormState);
+//   };
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = e.target.files?.[0] ?? null;
+//     if (file) {
+//       setFormState(prev => ({ ...prev, videoFile: file }));
+//       setVideoPreview(URL.createObjectURL(file));
+//     }
+//   };
+
+//   const handleResourceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files) {
+//       const newFiles = Array.from(e.target.files);
+//       setResourceFiles(prevFiles => [...prevFiles, ...newFiles]);
+//     }
+//     e.target.value = '';
+//   };
+
+//   const handleRemoveResourceFile = (indexToRemove: number) => {
+//     setResourceFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!formState.videoFile || !user || !formState.batchId) {
+//       setError('Please fill all fields, select a video file, and choose a batch.');
+//       return;
+//     }
+//     setIsLoading(true);
+//     setError('');
+//     setSuccessMessage('');
+
+//     try {
+//       // Upload video
+//       const presignResponse = await fetch('/api/upload', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({
+//           filename: formState.videoFile.name,
+//           contentType: formState.videoFile.type,
+//         }),
+//       });
+//       if (!presignResponse.ok) throw new Error('Failed to get pre-signed URL for video.');
+//       const { url: videoUrl, key: videoKey } = await presignResponse.json();
+//       await fetch(videoUrl, { method: 'PUT', body: formState.videoFile, headers: { 'Content-Type': formState.videoFile.type } });
+
+//       // Create lecture doc
+//       const newLecture = await databases.createDocument(DATABASE_ID, LECTURES_COLLECTION_ID, ID.unique(), {
+//         title: formState.title,
+//         subject: formState.subject,
+//         lectureDate: new Date(formState.lectureDate).toISOString(),
+//         s3Key: videoKey,
+//         uploaderId: user.$id,
+//         description: formState.description,
+//         batchId: formState.batchId,
+//       });
+
+//       // --- START: NEW, EFFICIENT NOTIFICATION LOGIC ---
+//       // Create only ONE notification, targeted at the batch.
+//       await databases.createDocument(
+//         DATABASE_ID,
+//         NOTIFICATIONS_COLLECTION_ID,
+//         ID.unique(),
+//         {
+//           targetId: formState.batchId, // Target the batch, not individual users
+//           message: `New Lecture: "${formState.title}" was added to your batch.`,
+//           link: `/lecture/${newLecture.$id}`,
+//           type: 'lecture',
+//         }
+//       );
+//       // --- END: NEW NOTIFICATION LOGIC ---
+
+//       // Upload resources
+//       for (const file of resourceFiles) {
+//         const resourcePresignResponse = await fetch('/api/resources/upload', {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({ filename: file.name, contentType: file.type }),
+//         });
+//         if (!resourcePresignResponse.ok) throw new Error(`Failed for ${file.name}.`);
+//         const { url: resourceUrl, key: resourceKey } = await resourcePresignResponse.json();
+//         await fetch(resourceUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+
+//         await databases.createDocument(DATABASE_ID, LECTURE_RESOURCES_COLLECTION_ID, ID.unique(), {
+//           lectureId: newLecture.$id,
+//           title: file.name,
+//           fileS3Key: resourceKey,
+//         });
+//       }
+
+//       setSuccessMessage('Lecture and resources uploaded successfully!');
+//       setTimeout(() => router.push('/home'), 2000);
+//     } catch (err) {
+//       if (err instanceof Error) setError(err.message);
+//       else setError('An error occurred during upload.');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-4xl mx-auto">
+//       <h1 className="text-3xl font-bold mb-6">Upload New Lecture</h1>
+//       <form onSubmit={handleSubmit} className="p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+
+//         {/* Category + Batch */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//           <div>
+//             <label htmlFor="category" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+//             <select id="category" value={formState.category} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md" required>
+//               <option value="">Select a Category</option>
+//               <option value="Academic">Academic</option>
+//               <option value="Coding and AI">Coding and AI</option>
+//             </select>
+//           </div>
+//           <div>
+//             <label htmlFor="batchId" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Batch</label>
+//             <select id="batchId" value={formState.batchId} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md" required disabled={!formState.category}>
+//               <option value="">Select a Batch</option>
+//               {filteredBatches.map(batch => (
+//                 <option key={batch.$id} value={batch.$id}>{batch.name}</option>
+//               ))}
+//             </select>
+//           </div>
+//         </div>
+
+//         {/* Title */}
+//         <div>
+//           <label htmlFor="title" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Lecture Title</label>
+//           <input type="text" id="title" value={formState.title} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md" required />
+//         </div>
+
+//         {/* Description */}
+//         <div>
+//           <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+//           <textarea id="description" value={formState.description} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md" rows={4} />
+//         </div>
+
+//         {/* Subject + Date */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//           <div>
+//             <label htmlFor="subject" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Subject</label>
+//             <select id="subject" value={formState.subject} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md disabled:bg-gray-200 dark:disabled:bg-gray-600 disabled:cursor-not-allowed" required disabled={!formState.batchId}>
+//               <option value="">Select a Subject</option>
+//               {availableSubjects.map(subject => (<option key={subject} value={subject}>{subject}</option>))}
+//             </select>
+//           </div>
+//           <div>
+//             <label htmlFor="lectureDate" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Lecture Date</label>
+//             <input type="date" id="lectureDate" value={formState.lectureDate} onChange={handleInputChange} className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md" required />
+//           </div>
+//         </div>
+
+//         {/* Video File + Preview */}
+//         <div>
+//           <label htmlFor="videoFile" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Video File</label>
+//           <input type="file" id="videoFile" accept="video/mp4,video/x-m4v,video/*" onChange={handleFileChange} className="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" required />
+
+//           {videoPreview && (
+//             <div className="mt-4">
+//               <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
+//               <video controls className="w-full rounded-md" src={videoPreview}></video>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Resources */}
+//         <div>
+//           <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Lecture Resources</label>
+//           <div className="space-y-2">
+//             {resourceFiles.map((file, index) => (
+//               <div key={index} className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded-md">
+//                 <span className="text-sm text-gray-800 dark:text-gray-300 truncate">{file.name}</span>
+//                 <button type="button" onClick={() => handleRemoveResourceFile(index)} className="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-500"><X size={16} /></button>
+//               </div>
+//             ))}
+//           </div>
+//           <button type="button" onClick={() => resourceInputRef.current?.click()} className="mt-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"><PlusCircle size={16} />Add Resource</button>
+//           <input type="file" ref={resourceInputRef} onChange={handleResourceFileChange} className="hidden" multiple accept=".pdf,.doc,.docx,.zip,.rar,.txt" />
+//         </div>
+
+//         {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+//         {successMessage && <p className="text-sm text-green-400 text-center">{successMessage}</p>}
+
+//         <div className="pt-4">
+//           <button type="submit" disabled={isLoading || successMessage !== ''} className="w-full px-4 py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-500">
+//             {isLoading ? 'Uploading...' : 'Upload Lecture'}
+//           </button>
+//         </div>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default withAdminAuth(UploadPage);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

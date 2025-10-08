@@ -1,3 +1,5 @@
+// app/context/AuthContext.tsx
+
 'use client';
 
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
@@ -79,31 +81,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkSession = async () => {
       setIsLoading(true);
+      console.log('Checking session...'); // Log session check
       try {
         const currentUser = await account.get();
+        console.log('Session valid, user:', currentUser.$id); // Confirm user
         setUser(currentUser);
         await fetchProfile(currentUser);
       } catch (error) {
+        console.log('No valid session, clearing state'); // Confirm no session
         setUser(null);
         setProfile(null);
       } finally {
         setIsLoading(false);
+        console.log('isLoading set to false');
       }
     };
     checkSession();
   }, []);
 
   const logout = async () => {
-    await account.deleteSession('current');
+    console.log('🔐 Starting logout...'); // Log start
+    try {
+      await account.deleteSession('current');
+      console.log('Session deleted successfully'); // Confirm deletion
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
     setUser(null);
     setProfile(null);
-    router.push('/login');
+    console.log('State cleared, pushing to /login'); // Before push
+    // router.replace('/login'); // Changed to replace for history safety
+    // console.log('Push/replace called'); // After push
+    setIsLoading(false);
   };
 
   const refetchProfile = async (): Promise<UserProfile | null> => {
     if (user) {
       // Clear profile before refetching to ensure we get the latest
-      setProfile(null); 
+      setProfile(null);
       return await fetchProfile(user);
     }
     return null;

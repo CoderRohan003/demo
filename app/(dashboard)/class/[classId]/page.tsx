@@ -1,3 +1,98 @@
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import { useParams } from "next/navigation";
+// import withAuth from "@/app/components/auth/withAuth";
+// import { databases } from "@/lib/appwrite";
+// import { Query } from "appwrite";
+// import BatchCard from "@/app/components/BatchCard"; // Import the new component
+
+// const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+// const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
+
+// interface Batch {
+//   $id: string;
+//   name: string;
+//   description: string;
+//   imageUrl?: string;
+//   price: number;
+// }
+
+// const SkeletonCard = () => (
+//     <div className="rounded-xl shadow-2xl animate-pulse bg-gray-200 dark:bg-gray-800 h-[26rem]">
+//         <div className="h-48 bg-gray-300 dark:bg-gray-700"></div>
+//         <div className="p-6 space-y-4">
+//             <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+//             <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+//         </div>
+//         <div className="px-6 pt-4 pb-6 mt-auto flex justify-between items-center">
+//             <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+//             <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
+//         </div>
+//     </div>
+// );
+
+// const ClassPage = () => {
+//   const params = useParams();
+//   const { classId } = params;
+//   const [batches, setBatches] = useState<Batch[]>([]);
+//   const [isLoading, setIsLoading] = useState(true);
+
+//   useEffect(() => {
+//     if (!classId) return;
+//     const fetchBatches = async () => {
+//       setIsLoading(true);
+//       try {
+//         const response = await databases.listDocuments(
+//           DATABASE_ID,
+//           BATCHES_COLLECTION_ID,
+//           [
+//             Query.equal("category", "Academic"), 
+//             Query.equal("targetClasses", Number(classId))
+//           ]
+//         );
+//         setBatches(response.documents as unknown as Batch[]);
+//       } catch (error) {
+//         console.error("Failed to fetch batches:", error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+//     fetchBatches();
+//   }, [classId]);
+
+//   return (
+//     <div className="container mx-auto px-4 py-8">
+//       <h1 className="text-4xl font-extrabold mb-8 text-center text-gray-900 dark:text-white">
+//         Available Batches for{" "}
+//         <span className="text-blue-500 dark:text-blue-400">Class {classId}</span>
+//       </h1>
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+//         {isLoading ? (
+//           <>
+//             <SkeletonCard />
+//             <SkeletonCard />
+//             <SkeletonCard />
+//           </>
+//         ) : batches.length > 0 ? (
+//           batches.map((batch) => <BatchCard key={batch.$id} batch={batch} />)
+//         ) : (
+//           <div className="col-span-full text-center py-16">
+//             <p className="text-2xl text-gray-500 dark:text-gray-400">
+//               😕 No academic batches found for this class yet.
+//             </p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default withAuth(ClassPage);
+
+
+
+
 
 "use client";
 
@@ -7,7 +102,7 @@ import withAuth from "@/app/components/auth/withAuth";
 import { databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import BatchCard from "@/app/components/BatchCard";
-import { GraduationCap, BookOpen, Users, Star, Search, Filter } from "lucide-react";
+import { GraduationCap, BookOpen, Users, Star, Search } from "lucide-react";
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
@@ -152,42 +247,34 @@ const ClassPage = () => {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.1)_1px,transparent_0)] [background-size:20px_20px] pointer-events-none"></div>
       
-      <div className="relative w-full max-w-7xl mx-auto px-6 py-8">
+      <div className="relative w-full max-w-7xl mx-auto px-6 py-6">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          
-          <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent mb-4 leading-tight">
-            {classNumber && getClassOrdinal(classNumber)} Grade
-          </h1>
-          
-          <p className="text-xl text-gray-600 dark:text-gray-300 font-medium mb-8 max-w-2xl mx-auto">
-            Discover premium academic batches designed specifically for your grade level
-          </p>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mt-3 mb-6">
+            <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent leading-tight">
+              {classNumber && getClassOrdinal(classNumber)} Grade
+            </h1>
 
-          {/* Search Bar */}
-          {!isLoading && batches.length > 0 && (
-            <div className="max-w-md mx-auto relative mb-8">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search batches..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-              />
-            </div>
-          )}
+            {/* Search Bar */}
+            {!isLoading && batches.length > 0 && (
+                <div className="max-w-md relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                  <Search className="h-5 w-5 text-blue-600 dark:text-gray-400 " />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search batches..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+                </div>
+            )}
+          </div>
 
           {/* Stats Cards */}
           {!isLoading && batches.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
               <StatsCard
                 icon={BookOpen}
                 title="Available Batches"
@@ -267,7 +354,7 @@ const ClassPage = () => {
 
         {/* Additional Info Section */}
         {!isLoading && batches.length > 0 && (
-          <div className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-3xl p-8 border border-blue-200/50 dark:border-blue-700/50">
+          <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-3xl p-8 border border-blue-200/50 dark:border-blue-700/50">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 Why Choose Our Academic Batches?

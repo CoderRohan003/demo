@@ -1,3 +1,185 @@
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import { useParams } from 'next/navigation';
+// import { useDate } from '@/context/DateContext';
+// import withAuth from '@/app/components/auth/withAuth';
+// import LectureCard from '@/app/components/LectureCard';
+// import { databases } from '@/lib/appwrite';
+// import { Query } from 'appwrite';
+// import { useAuth } from '@/context/AuthContext';
+
+// const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+// const LECTURES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURES_COLLECTION_ID!;
+// const PROFILES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_TEACHER_PROFILES_COLLECTION_ID!;
+// const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
+// const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
+
+// interface Lecture {
+//   $id: string;
+//   title: string;
+//   subject: string;
+//   uploaderId: string;
+//   teacherName: string;
+//   teacherImage: string;
+// }
+
+// interface Batch {
+//     name: string;
+// }
+
+// const BatchLecturesPage = () => {
+//   const { selectedDate } = useDate();
+//   const params = useParams();
+//   const { id: batchId } = params;
+//   const { user } = useAuth();
+//   const [lectures, setLectures] = useState<Lecture[]>([]);
+//   const [batch, setBatch] = useState<Batch | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [completedLectures, setCompletedLectures] = useState<string[]>([]);
+
+//   useEffect(() => {
+//     if (!batchId || !user) return;
+
+//     const fetchBatchDetails = async () => {
+//         try {
+//             const batchData = await databases.getDocument(DATABASE_ID, BATCHES_COLLECTION_ID, batchId as string);
+//             setBatch({ name: batchData.name } as Batch);
+//         } catch (error) {
+//             console.error("Failed to fetch batch details:", error);
+//         }
+//     };
+
+//     const fetchLecturesAndTeachers = async () => {
+//       setIsLoading(true);
+//       try {
+//         const startOfDay = new Date(selectedDate);
+//         startOfDay.setHours(0, 0, 0, 0);
+//         const endOfDay = new Date(selectedDate);
+//         endOfDay.setHours(23, 59, 59, 999);
+
+//         const lectureResponse = await databases.listDocuments(
+//           DATABASE_ID,
+//           LECTURES_COLLECTION_ID,
+//           [
+//             Query.equal('batchId', batchId as string),
+//             Query.greaterThanEqual('lectureDate', startOfDay.toISOString()),
+//             Query.lessThanEqual('lectureDate', endOfDay.toISOString())
+//           ]
+//         );
+
+//         const enrollmentResponse = await databases.listDocuments(
+//           DATABASE_ID,
+//           ENROLLMENTS_COLLECTION_ID,
+//           [
+//             Query.equal('userId', user.$id),
+//             Query.equal('batchId', batchId as string),
+//           ]
+//         );
+//         if (enrollmentResponse.documents.length > 0) {
+//           setCompletedLectures(enrollmentResponse.documents[0].completedLectures || []);
+//         }
+
+//         if (lectureResponse.documents.length === 0) {
+//           setLectures([]);
+//           setIsLoading(false);
+//           return;
+//         }
+
+//         const teacherIds = [...new Set(lectureResponse.documents.map(doc => doc.uploaderId))];
+
+//         const profileResponse = await databases.listDocuments(
+//           DATABASE_ID,
+//           PROFILES_COLLECTION_ID,
+//           [Query.equal('userId', teacherIds)]
+//         );
+
+//         const teacherProfiles = new Map(profileResponse.documents.map(p => [p.userId, p]));
+//         const enrichedLectures = lectureResponse.documents.map(doc => {
+//           const teacher = teacherProfiles.get(doc.uploaderId);
+
+//           const teacherImage = teacher?.avatarS3Key
+//             ? `/api/avatar-view?s3Key=${teacher.avatarS3Key}`
+//             : '/no-dp.png';
+
+//           return {
+//             $id: doc.$id,
+//             title: doc.title,
+//             subject: doc.subject,
+//             uploaderId: doc.uploaderId,
+//             teacherName: teacher ? teacher.name : 'Unknown Teacher',
+//             teacherImage: teacherImage,
+//           } as Lecture;
+//         });
+
+//         setLectures(enrichedLectures);
+
+//       } catch (error) {
+//         console.error("Failed to fetch data:", error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchBatchDetails();
+//     fetchLecturesAndTeachers();
+//   }, [selectedDate, batchId, user]);
+
+//   return (
+//     <div className="w-full h-full flex flex-col">
+//       <h1 className="text-3xl font-bold mb-4">
+//         Lectures for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+//       </h1>
+
+//       <div className="flex-grow pt-4">
+//         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+//           {isLoading ? (
+//             <p className="col-span-full">Loading lectures...</p>
+//           ) : lectures.length > 0 ? (
+//             lectures.map(lecture => (
+//               <LectureCard
+//                 key={lecture.$id}
+//                 id={lecture.$id}
+//                 title={lecture.title}
+//                 subject={lecture.subject}
+//                 teacherName={lecture.teacherName}
+//                 teacherImage={lecture.teacherImage}
+//                 isCompleted={completedLectures.includes(lecture.$id)}
+//               />
+//             ))
+//           ) : (
+//             <p className="col-span-full text-center text-gray-500 dark:text-gray-400 mt-8">No classes scheduled for this day in this batch.</p>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default withAuth(BatchLecturesPage);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,7 +199,7 @@ const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const LECTURES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURES_COLLECTION_ID!;
 const PROFILES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_TEACHER_PROFILES_COLLECTION_ID!;
 const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
-const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_ENROLLMENTS_COLLECTION_ID!;
+const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
 
 interface Lecture {
   $id: string;
@@ -225,9 +407,7 @@ const BatchLecturesPage = () => {
               <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent mb-3 leading-tight">
                 {formatDate(selectedDate)}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">
-                Your learning journey continues
-              </p>
+              
             </div>
 
             {/* Stats Cards */}

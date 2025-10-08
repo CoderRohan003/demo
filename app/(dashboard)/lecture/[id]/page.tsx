@@ -1,3 +1,223 @@
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import { useParams } from 'next/navigation';
+// import dynamic from 'next/dynamic';
+// import withAuth from '@/app/components/auth/withAuth';
+// import { databases } from '@/lib/appwrite';
+// import { useAuth } from '@/context/AuthContext';
+// import { Query } from 'appwrite';
+// import { FileText } from 'lucide-react';
+// import { FullPageLoader } from '@/app/components/FullPageLoader';
+
+// const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
+
+// const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+// const LECTURES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURES_COLLECTION_ID!;
+// const LECTURE_RESOURCES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURE_RESOURCES_COLLECTION_ID!;
+// const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
+
+// interface Lecture {
+//   $id: string;
+//   title: string;
+//   subject: string;
+//   s3Key: string;
+//   description: string;
+//   batchId: string;
+// }
+
+// interface LectureResource {
+//   $id: string;
+//   title: string;
+//   fileS3Key: string;
+// }
+
+// const LecturePage = () => {
+//   const params = useParams();
+//   const { id } = params;
+//   const { user } = useAuth();
+//   const [lecture, setLecture] = useState<Lecture | null>(null);
+//   const [resources, setResources] = useState<LectureResource[]>([]);
+//   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [isCompleted, setIsCompleted] = useState(false);
+//   const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
+//   const [completedLectures, setCompletedLectures] = useState<string[]>([]);
+
+//   useEffect(() => {
+//     if (!id || !user) return;
+
+//     const fetchLectureAndResources = async () => {
+//       setIsLoading(true);
+//       try {
+//         const lectureData = await databases.getDocument(
+//           DATABASE_ID,
+//           LECTURES_COLLECTION_ID,
+//           id as string
+//         ) as unknown as Lecture;
+//         setLecture(lectureData);
+
+//         const response = await fetch('/api/view', {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({ s3Key: lectureData.s3Key }),
+//         });
+//         if (!response.ok) throw new Error('Failed to get video URL.');
+//         const { url } = await response.json();
+//         setVideoUrl(url);
+
+//         const resourceResponse = await databases.listDocuments(
+//           DATABASE_ID,
+//           LECTURE_RESOURCES_COLLECTION_ID,
+//           [Query.equal('lectureId', id as string)]
+//         );
+//         setResources(resourceResponse.documents as unknown as LectureResource[]);
+
+//         const enrollmentResponse = await databases.listDocuments(
+//           DATABASE_ID,
+//           ENROLLMENTS_COLLECTION_ID,
+//           [
+//             Query.equal('userId', user.$id),
+//             Query.equal('batchId', lectureData.batchId),
+//           ]
+//         );
+
+//         if (enrollmentResponse.documents.length > 0) {
+//           const enrollment = enrollmentResponse.documents[0];
+//           setEnrollmentId(enrollment.$id);
+//           const completed = enrollment.completedLectures || [];
+//           setCompletedLectures(completed);
+//           setIsCompleted(completed.includes(id as string));
+//         }
+
+//       } catch (error) {
+//         console.error(error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchLectureAndResources();
+//   }, [id, user]);
+
+//   const handleResourceDownload = async (s3Key: string) => {
+//     try {
+//       const response = await fetch('/api/resources/view', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ s3Key }),
+//       });
+//       if (!response.ok) throw new Error('Failed to get resource URL.');
+//       const { url } = await response.json();
+//       window.open(url, '_blank');
+//     } catch (error) {
+//       console.error('Failed to download resource:', error);
+//       alert('Could not download resource.');
+//     }
+//   };
+
+//   const toggleComplete = async () => {
+//     if (!enrollmentId) return;
+//     const newCompletedLectures = isCompleted
+//       ? completedLectures.filter(lectureId => lectureId !== id)
+//       : [...completedLectures, id as string];
+
+//     try {
+//       await databases.updateDocument(
+//         DATABASE_ID,
+//         ENROLLMENTS_COLLECTION_ID,
+//         enrollmentId,
+//         { completedLectures: newCompletedLectures }
+//       );
+//       setCompletedLectures(newCompletedLectures);
+//       setIsCompleted(!isCompleted);
+//     } catch (error) {
+//       console.error('Failed to update completion status:', error);
+//     }
+//   };
+
+//   if (isLoading) {
+//     return (
+//       <div className="flex items-center justify-center h-full">
+//         <FullPageLoader />
+//       </div>
+//     );
+//   }
+
+//   if (!lecture) {
+//     return <div className="text-center">Lecture not found.</div>;
+//   }
+
+//   return (
+//     <div className="w-full h-full flex flex-col p-6">
+//       <div className="flex justify-between items-center mb-4">
+//         <h1 className="text-3xl font-bold">{lecture.title}</h1>
+//         <button
+//           onClick={toggleComplete}
+//           className={`px-4 py-2 rounded-lg font-semibold transition-colors text-white ${isCompleted
+//             ? 'bg-green-600 hover:bg-green-700'
+//             : 'bg-gray-700 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500'
+//             }`}
+//         >
+//           {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
+//         </button>
+//       </div>
+//       <div className="bg-black aspect-video rounded-xl flex-1 flex items-center justify-center overflow-hidden mb-4">
+//         {videoUrl ? (
+//           <ReactPlayer
+//             src={videoUrl}
+//             controls={true}
+//             width="100%"
+//             height="100%"
+//           />
+//         ) : (
+//           <p>Loading video player...</p>
+//         )}
+//       </div>
+//       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+//         <h2 className="text-2xl font-semibold mb-2">Notes</h2>
+//         <p className="text-gray-600 dark:text-gray-400">{lecture.description}</p>
+//       </div>
+
+//       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg mt-4 border border-gray-200 dark:border-gray-700">
+//         <h2 className="text-2xl font-semibold mb-4">Resources</h2>
+//         {resources.length > 0 ? (
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+//             {resources.map(resource => (
+//               <button
+//                 key={resource.$id}
+//                 onClick={() => handleResourceDownload(resource.fileS3Key)}
+//                 className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg flex items-center gap-4 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-left border border-gray-200 dark:border-gray-600"
+//               >
+//                 <FileText className="w-8 h-8 text-blue-500 dark:text-blue-400 flex-shrink-0" />
+//                 <span className="font-medium truncate">{resource.title}</span>
+//               </button>
+//             ))}
+//           </div>
+//         ) : (
+//           <p className="text-gray-500 dark:text-gray-400">No resources for this lecture.</p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default withAuth(LecturePage);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 'use client';
@@ -17,7 +237,7 @@ const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const LECTURES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURES_COLLECTION_ID!;
 const LECTURE_RESOURCES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LECTURE_RESOURCES_COLLECTION_ID!;
-const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_ENROLLMENTS_COLLECTION_ID!;
+const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_COLLECTION_ID!;
 
 interface Lecture {
   $id: string;
@@ -284,7 +504,7 @@ const LecturePage = () => {
                   <button
                     key={resource.$id}
                     onClick={() => handleResourceDownload(resource.fileS3Key)}
-                    className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl flex items-center gap-4 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-300 text-left border border-blue-200/50 dark:border-blue-700/50 group transform hover:scale-105"
+                    className="w-full cursor-pointer bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl flex items-center gap-4 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-300 text-left border border-blue-200/50 dark:border-blue-700/50 group transform hover:scale-105"
                     style={{
                       animationDelay: `${index * 100}ms`,
                       animation: 'fadeInUp 0.6s ease-out forwards'

@@ -3,12 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import withSuperAdminAuth from '@/app/components/auth/withSuperAdminAuth';
-import { 
-  Users, 
-  Book, 
-  Trash2, 
-  UserPlus, 
-  PlusCircle, 
+import {
+  Users,
+  Book,
+  Trash2,
+  UserPlus,
+  PlusCircle,
   Search,
   Crown,
   Shield,
@@ -20,7 +20,8 @@ import {
   Edit,
   UserCheck,
   GraduationCap,
-  Activity
+  Activity,
+  MessageSquarePlus
 } from 'lucide-react';
 import { FullPageLoader } from '@/app/components/FullPageLoader';
 
@@ -142,7 +143,7 @@ const SuperAdminPage = () => {
     }
   };
 
-    const handleDownload = () => {
+  const handleDownload = () => {
     window.print();
   };
 
@@ -176,9 +177,42 @@ const SuperAdminPage = () => {
                 <p className="text-gray-600 dark:text-gray-400 text-sm">Manage your platform with complete control</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <button onClick={handleDownload} className="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+              {/* 
+              <Link
+                href="/super-admin/create-announcement"
+                className="group bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2 print:hidden"
+              >
+                <MessageSquarePlus className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                <span className="font-semibold">Create Announcement</span>
+              </Link>
+
+              Alternative: If you want to match the "Create Batch" button style exactly
+              <Link
+                href="/super-admin/create-announcement"
+                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2 print:hidden"
+              >
+                <MessageSquarePlus className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+                <span>Create Announcement</span>
+              </Link> 
+               */}
+
+              {/* Alternative: Unique styling that still matches the overall design */}
+              <Link
+                href="/super-admin/create-announcement"
+                className="group bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-medium mr-4 py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2 relative overflow-hidden print:hidden"
+              >
+                {/* Animated background effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+
+                <MessageSquarePlus className="w-4 h-4 group-hover:scale-110 transition-transform duration-200 relative z-10" />
+                <span className="font-semibold relative z-10">Announce</span>
+
+                {/* Notification indicator */}
+                <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse relative z-10"></div>
+              </Link>
+              <button onClick={handleDownload} className="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border-2 border-black dark:border-white">
                 <Download className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
               <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
@@ -192,21 +226,21 @@ const SuperAdminPage = () => {
       <div className="p-6 space-y-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <StatCard 
-            icon={<GraduationCap className="w-6 h-6" />} 
-            title="Total Students" 
+          <StatCard
+            icon={<GraduationCap className="w-6 h-6" />}
+            title="Total Students"
             value={stats?.studentCount ?? 0}
             color="blue"
           />
-          <StatCard 
-            icon={<Users className="w-6 h-6" />} 
-            title="Total Teachers" 
+          <StatCard
+            icon={<Users className="w-6 h-6" />}
+            title="Total Teachers"
             value={stats?.teacherCount ?? 0}
             color="purple"
           />
-          <StatCard 
-            icon={<Book className="w-6 h-6" />} 
-            title="Total Batches" 
+          <StatCard
+            icon={<Book className="w-6 h-6" />}
+            title="Total Batches"
             value={stats?.batchCount ?? 0}
             color="emerald"
           />
@@ -291,8 +325,8 @@ const SuperAdminPage = () => {
                       <button className="p-2 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleDeleteBatch(batch.$id)} 
+                      <button
+                        onClick={() => handleDeleteBatch(batch.$id)}
                         className="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -333,10 +367,10 @@ const SuperAdminPage = () => {
   );
 };
 
-const StatCard = ({ icon, title, value, color }: { 
-  icon: React.ReactNode; 
-  title: string; 
-  value: number; 
+const StatCard = ({ icon, title, value, color }: {
+  icon: React.ReactNode;
+  title: string;
+  value: number;
   color: 'blue' | 'purple' | 'emerald';
 }) => {
   const colorClasses = {
@@ -350,7 +384,7 @@ const StatCard = ({ icon, title, value, color }: {
     purple: 'bg-purple-100 dark:bg-purple-900/20',
     emerald: 'bg-emerald-100 dark:bg-emerald-900/20'
   };
-  
+
   const textClasses = {
     blue: 'text-blue-600 dark:text-blue-400',
     purple: 'text-purple-600 dark:text-purple-400',
@@ -362,7 +396,7 @@ const StatCard = ({ icon, title, value, color }: {
       <div className="absolute inset-0 opacity-5 dark:opacity-10">
         <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color]} transform rotate-12 scale-150`}></div>
       </div>
-      
+
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className={`${bgClasses[color]} p-4 rounded-2xl`}>
@@ -375,7 +409,7 @@ const StatCard = ({ icon, title, value, color }: {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
           </div>
         </div>
-        
+
         <div className="flex flex-col items-end print:hidden">
           <Activity className="w-5 h-5 text-gray-400 dark:text-gray-500 mb-2" />
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -385,15 +419,15 @@ const StatCard = ({ icon, title, value, color }: {
   );
 };
 
-const UserManagementSection = ({ 
-  title, 
-  users, 
-  searchTerm, 
-  setSearchTerm, 
-  onDelete, 
+const UserManagementSection = ({
+  title,
+  users,
+  searchTerm,
+  setSearchTerm,
+  onDelete,
   onAddToTeam,
   icon,
-  color 
+  color
 }: {
   title: string;
   users: User[];
@@ -453,10 +487,10 @@ const UserManagementSection = ({
       <div className="p-6 max-h-96 overflow-y-auto print:max-h-none print:overflow-visible">
         <div className="space-y-4">
           {users.length > 0 ? users.map(user => (
-            <UserCard 
-              key={user.$id} 
-              user={user} 
-              onDelete={onDelete} 
+            <UserCard
+              key={user.$id}
+              user={user}
+              onDelete={onDelete}
               onAddToTeam={onAddToTeam}
               color={color}
             />
@@ -475,14 +509,14 @@ const UserManagementSection = ({
   );
 };
 
-const UserCard = ({ 
-  user, 
-  onDelete, 
+const UserCard = ({
+  user,
+  onDelete,
   onAddToTeam,
-  color 
-}: { 
-  user: User; 
-  onDelete: (user: User) => void; 
+  color
+}: {
+  user: User;
+  onDelete: (user: User) => void;
   onAddToTeam?: (user: User) => void;
   color: 'purple' | 'blue';
 }) => {
@@ -520,17 +554,17 @@ const UserCard = ({
         {/* Actions */}
         <div className="flex items-center gap-3 flex-shrink-0 print:hidden">
           {onAddToTeam && !user.isTeamMember && (
-            <button 
-              onClick={() => onAddToTeam(user)} 
+            <button
+              onClick={() => onAddToTeam(user)}
               className="group/btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2 text-sm"
             >
               <UserPlus className="w-4 h-4" />
               Add to Team
             </button>
           )}
-          
-          <button 
-            onClick={() => onDelete(user)} 
+
+          <button
+            onClick={() => onDelete(user)}
             className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 group-hover:opacity-100 opacity-60"
           >
             <Trash2 className="w-4 h-4" />

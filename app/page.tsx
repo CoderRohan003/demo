@@ -28,7 +28,7 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 
 // Images
 import schoolLogo from "@/public/logo.webp";
-
+import miseLogo from "@/public/miselogo.png";
 import { FullPageLoader } from "./components/FullPageLoader";
 
 const backgroundImages = [
@@ -38,6 +38,7 @@ const backgroundImages = [
   "/MISE/image4.JPG",
   "/MISE/image5.JPG",
 ];
+
 
 // Type for the course data
 interface Course {
@@ -86,7 +87,7 @@ export default function LandingPage() {
         }));
         setCourses(coursesData);
       } catch (error) {
-        console.error("Faiiled to fetch courses:", error);
+        console.error("Failed to fetch courses:", error);
       } finally {
         setLoadingCourses(false);
       }
@@ -126,18 +127,19 @@ export default function LandingPage() {
       <section className="relative min-h-screen overflow-hidden bg-gray-900">
         {/* Background Carousel */}
         <div className="absolute inset-0 z-0">
-          {backgroundImages.map((src, index) => (
-            <Image
-              key={index}
-              src={src}
-              alt={`School campus ${index + 1}`}
-              fill
-              priority={index === 0}
-              className={`absolute inset-0 object-cover transition-opacity duration-1000 ${index === currentBg ? "opacity-30" : "opacity-0"
-                }`}
-            />
-          ))}
-        </div>
+  {backgroundImages.map((src, index) => (
+    <Image
+      key={index}
+      src={src}
+      alt={`School campus ${index + 1}`}
+      fill
+      priority={index === 0}
+      className={`absolute inset-0 object-cover transition-opacity duration-1000 ${
+        index === currentBg ? "opacity-30" : "opacity-0"
+      }`}
+    />
+  ))}
+</div>
 
 
         {/* Foreground Content */}
@@ -146,20 +148,20 @@ export default function LandingPage() {
             <span className="bg-white">
               <Image src={schoolLogo} alt="MISE Logo" width={300} height={200} />
             </span>
-            <Image src={schoolLogo} alt="MISE Logo" width={100} height={100} className="rounded-full" />
+            <Image src={miseLogo} alt="MISE Logo" width={250} height={250} className="rounded-full" />
           </header>
 
           <div className="flex-grow flex flex-col items-center justify-center text-center max-w-2xl mx-auto py-20 md:py-32 px-4">
             <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">Welcome to MISE</h1>
             <p className="text-xl md:text-xl text-white mb-8">
-              Your journey to academic excellence starts here. Access high-quality video lectures, track your progress, and join a community of learners.
+              Step into academic excellence with our insightful guidance and blend the best of both worlds of personalized offline learning and digital access to expert-led recorded lectures.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 w-full">
               <Link href="/register" className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 font-semibold text-white bg-blue-600 rounded-lg transition-transform transform hover:scale-105 hover:bg-white hover:text-black hover:font-bold hover:text-lg">
                 Get Started <ArrowRight size={20} />
               </Link>
-              <Link href="/login" className="w-full sm:w-auto px-8 py-4 font-semibold bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-[#EFBF04] hover:font-bold hover:text-lg hover:text-[#000] transition-colors">
-                I already have an account
+              <Link href="/login" className="w-full sm:w-auto px-8 py-4 font-semibold bg-white text-black border border-blue-600 rounded-lg hover:bg-[#EFBF04] hover:font-bold hover:text-lg hover:text-[#000] transition-colors">
+                Sign In
               </Link>
             </div>
           </div>
@@ -183,8 +185,8 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <Users size={48} className="text-blue-600 dark:text-blue-400 mb-4" />
-              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Community Support</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Connect with peers and instructors in our vibrant community.</p>
+              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Offline Classes</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Participate in engaging offline classes for a face-to-face learning experience.</p>
             </div>
             <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <Video size={48} className="text-blue-600 dark:text-blue-400 mb-4" />

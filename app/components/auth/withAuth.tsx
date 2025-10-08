@@ -1,3 +1,5 @@
+//app/components/auth/withAuth.tsx
+
 'use client';
 
 import { useEffect } from 'react';
@@ -11,11 +13,14 @@ const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) =>
     const router = useRouter();
     const pathname = usePathname();
 
-    useEffect(() => {
-      if (!isLoading && !user && pathname !== '/login' && pathname !== '/register') {
-        router.replace('/login');
-      }
-    }, [user, isLoading, router, pathname]);
+    // In withAuth.tsx, update the useEffect:
+useEffect(() => {
+  console.log('withAuth effect running:', { isLoading, hasUser: !!user, pathname }); // Log dependencies
+  if (!isLoading && !user && pathname !== '/login' && pathname !== '/register') {
+    console.log('Triggering redirect to /login'); // Confirm trigger
+    router.replace('/login');
+  }
+}, [user, isLoading, router, pathname]);
 
     if (isLoading || (!user && pathname !== '/login' && pathname !== '/register')) {
       return <FullPageLoader />;
