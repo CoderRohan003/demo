@@ -1,4 +1,4 @@
-// app/context/AuthContext.tsx
+// context/AuthContext.tsx
 
 'use client';
 
@@ -22,6 +22,7 @@ interface UserProfile extends Models.Document {
   avatarS3Key?: string;
   experience?: string;
   qualifications?: string[];
+  approved: boolean;
 }
 
 interface AuthContextType {
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           [Query.equal('userId', currentUser.$id)]
         );
         if (response.documents.length > 0) {
-          const foundProfile = response.documents[0] as UserProfile;
+          const foundProfile = response.documents[0] as unknown as UserProfile;
           setProfile(foundProfile);
           return foundProfile;
         }
@@ -81,44 +82,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkSession = async () => {
       setIsLoading(true);
-      console.log('Checking session...'); // Log session check
       try {
         const currentUser = await account.get();
-        console.log('Session valid, user:', currentUser.$id); // Confirm user
         setUser(currentUser);
         await fetchProfile(currentUser);
       } catch (error) {
-        console.log('No valid session, clearing state'); // Confirm no session
         setUser(null);
         setProfile(null);
       } finally {
         setIsLoading(false);
-        console.log('isLoading set to false');
       }
     };
     checkSession();
   }, []);
 
   const logout = async () => {
-    console.log('🔐 Starting logout...'); // Log start
-    try {
-      await account.deleteSession('current');
-      console.log('Session deleted successfully'); // Confirm deletion
-    } catch (error) {
-      console.error('Failed to delete session:', error);
-    }
+    await account.deleteSession('current');
     setUser(null);
     setProfile(null);
-    console.log('State cleared, pushing to /login'); // Before push
-    // router.replace('/login'); // Changed to replace for history safety
-    // console.log('Push/replace called'); // After push
-    setIsLoading(false);
+    router.push('/login');
   };
 
   const refetchProfile = async (): Promise<UserProfile | null> => {
     if (user) {
       // Clear profile before refetching to ensure we get the latest
-      setProfile(null);
+      setProfile(null); 
       return await fetchProfile(user);
     }
     return null;

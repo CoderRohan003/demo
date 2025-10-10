@@ -1,3 +1,5 @@
+// app/(auth)/login/page.tsx
+
 'use client';
 
 import Link from 'next/link';
@@ -57,31 +59,38 @@ const LoginPage = () => {
 
       let userProfile = null;
       const collectionsToCheck = [
-          SUPER_ADMIN_PROFILES_COLLECTION_ID,
-          TEACHER_PROFILES_COLLECTION_ID,
-          STUDENT_PROFILES_COLLECTION_ID,
+        SUPER_ADMIN_PROFILES_COLLECTION_ID,
+        TEACHER_PROFILES_COLLECTION_ID,
+        STUDENT_PROFILES_COLLECTION_ID,
       ];
 
       for (const collectionId of collectionsToCheck) {
-          const response = await databases.listDocuments(
-              DATABASE_ID,
-              collectionId,
-              [Query.equal('userId', currentUser.$id)]
-          );
-          if (response.documents.length > 0) {
-              userProfile = response.documents[0];
-              break;
-          }
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          collectionId,
+          [Query.equal('userId', currentUser.$id)]
+        );
+        if (response.documents.length > 0) {
+          userProfile = response.documents[0];
+          break;
+        }
       }
-      
-      setProfile(userProfile);
+
+      setProfile(userProfile ? {
+        ...userProfile,
+        approved: userProfile.approved ?? false, // Ensure 'approved' exists
+      } : null);
 
       if (userProfile?.role === 'super-admin') {
-          router.push('/super-admin');
+        router.push('/super-admin');
       } else if (userProfile?.role === 'teacher') {
+        if (userProfile.approved) {
           router.push('/admin/upload');
+        } else {
+          router.push('/teacher-pending');  // NEW: Add this line
+        }
       } else {
-          router.push('/home');
+        router.push('/home');
       }
 
     } catch (err: unknown) {
@@ -98,9 +107,9 @@ const LoginPage = () => {
     <div className="w-full">
       <h1 className="text-2xl md:text-3xl font-bold text-[rgb(var(--card-foreground))]">Welcome Back!</h1>
       <p className="text-sm text-[rgb(var(--muted-foreground))] mt-2">Enter your credentials to access your account.</p>
-      
+
       <div className="my-6">
-        <button 
+        <button
           onClick={handleGoogleLogin}
           className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 border border-[rgb(var(--border))] rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
           <GoogleIcon /> Sign in with Google
@@ -150,11 +159,11 @@ const LoginPage = () => {
 
         {/* --- NEW FORGOT PASSWORD LINK --- */}
         <div className="text-right">
-            <Link href="/forgot-password" legacyBehavior>
-                <a className="text-sm font-medium text-blue-400 hover:underline">
-                    Forgot Password?
-                </a>
-            </Link>
+          <Link href="/forgot-password" legacyBehavior>
+            <a className="text-sm font-medium text-blue-400 hover:underline">
+              Forgot Password?
+            </a>
+          </Link>
         </div>
 
         {error && <p className="text-sm text-[rgb(var(--destructive))] text-center">{error}</p>}

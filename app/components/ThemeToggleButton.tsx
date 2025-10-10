@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import '@/app/module.themetoggle.css';
 
 export function ThemeToggleButton() {
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -17,8 +17,8 @@ export function ThemeToggleButton() {
       <input
         type="checkbox"
         className="theme-switch__checkbox"
-        checked={theme === 'dark'}
-        onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        checked={resolvedTheme === 'dark'}
+        onChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       />
       <div className="theme-switch__container">
         <div className="theme-switch__clouds"></div>

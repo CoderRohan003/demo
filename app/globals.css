@@ -239,6 +239,21 @@
   color: var(--rdp-text-color);
 }
 
+.rdp-chevron{
+  fill: #000;
+}
+
+.dark .rdp-chevron{
+  fill: #fff;
+}
+.rdp-day_button .rdp-selected{
+  border: #000;
+}
+
+.dark .rdp-day_button{
+  border: #fff;
+}
+
 .rdp-day_today {
   font-weight: bold !important;
   color: var(--rdp-today-color) !important;

@@ -64,6 +64,7 @@ interface TeacherProfile {
   title: string;
   experience: string;
   qualifications: string[];
+  approved: boolean;  // ✅ Boolean
 }
 
 type Profile = StudentProfile | TeacherProfile;
@@ -101,14 +102,14 @@ const RegisterPage = () => {
     const hasNoErrors =
       !fieldErrors.email && !fieldErrors.password && !fieldErrors.phone;
 
-    setIsFormValid(Boolean(isDataFilled && hasNoErrors)); // ✅ Fixed line
+    setIsFormValid(Boolean(isDataFilled && hasNoErrors));
   }, [formData, fieldErrors, role]);
 
   const handleGoogleLogin = () => {
     try {
       account.createOAuth2Session(
         OAuthProvider.Google,
-        `${window.location.origin}/home`,
+        `${window.location.origin}/google-register`,
         `${window.location.origin}/register`
       );
     } catch (error) {
@@ -190,6 +191,7 @@ const RegisterPage = () => {
           title: '',
           experience: '',
           qualifications: [],
+          approved: false,  // ✅ Boolean
         };
       }
 
@@ -202,22 +204,30 @@ const RegisterPage = () => {
       const currentUser = await account.get();
       setUser(currentUser);
       const updatedProfile = await refetchProfile();
-      setProfile(updatedProfile);
 
-      setMessage('Registration successful! Redirecting...');
-      window.location.href = role === 'teacher' ? '/admin/upload' : '/home';
-    } catch (err: unknown) {
-      if (newUser) {
-        console.error('CRITICAL: User was created in Auth, but profile creation failed.', err);
-        setError('Registration incomplete. Please contact support.');
-      } else {
-        if (err instanceof AppwriteException && err.code === 409) {
-          setError('A user with this email already exists.');
-        } else if (err instanceof Error) {
-          setError(err.message);
+      // Redirect based on updated profile (with boolean checks)
+      if (updatedProfile) {
+        if (updatedProfile.role === 'teacher' && !updatedProfile.approved) {  // ✅ Boolean check
+          router.push('/teacher-pending');
+        } else if (updatedProfile.role === 'teacher') {
+          router.push('/admin/upload');
+        } else if (updatedProfile.role === 'super-admin') {
+          router.push('/super-admin');
         } else {
-          setError('An unexpected error occurred during account creation.');
+          router.push('/home');
         }
+      } else {
+        router.push('/home');  // Fallback
+      }
+
+    } catch (err: unknown) {
+      setIsLoading(false);
+      if (err instanceof AppwriteException && err.code === 409) {
+        setError('A user with this email already exists.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred during account creation.');
       }
     } finally {
       setIsLoading(false);

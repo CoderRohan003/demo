@@ -1,3 +1,5 @@
+// app/api/super-admin/users/route.ts
+
 import { NextResponse } from 'next/server';
 import { getAdminDatabases, getAdminUsers, getAdminTeams } from '@/lib/appwrite-admin';
 import { Query, Role } from 'node-appwrite';
@@ -92,6 +94,24 @@ export async function POST(request: Request) {
     });
 
     console.log("✅ Membership created successfully:", membership);
+
+    // NEW: Update the teacher profile to mark as approved
+    const databases = getAdminDatabases();
+    const profileResponse = await databases.listDocuments(
+      DATABASE_ID,
+      TEACHER_PROFILES_COLLECTION_ID,
+      [Query.equal('userId', userId)]
+    );
+    if (profileResponse.documents.length > 0) {
+      const profileId = profileResponse.documents[0].$id;
+      await databases.updateDocument(
+        DATABASE_ID,
+        TEACHER_PROFILES_COLLECTION_ID,
+        profileId,
+        { approved: true }
+      );
+      console.log("✅ Teacher profile updated to approved");
+    }
 
     return NextResponse.json({
       success: true,

@@ -19,6 +19,7 @@ const CompleteGoogleRegistrationPage = () => {
     const [role, setRole] = useState<'student' | 'teacher'>('student');
     const [academicLevel, setAcademicLevel] = useState('');
     const [phone, setPhone] = useState('');
+    const [phoneError, setPhoneError] = useState('');  // NEW: Phone validation error
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -29,10 +30,26 @@ const CompleteGoogleRegistrationPage = () => {
         }
     }, [profile, isAuthLoading, router]);
 
+    // NEW: Phone validation function
+    const validatePhone = (value: string) => {
+        let errorMsg = '';
+        if (!value) errorMsg = 'Phone number is required.';
+        else if (!/^\d{10}$/.test(value))
+            errorMsg = 'Phone number must be exactly 10 digits.';
+        setPhoneError(errorMsg);
+    };
+
+    // UPDATED: Phone onChange with validation
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPhone(value);
+        validatePhone(value);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!phone) {
-            setError('Please enter your phone number.');
+        if (!phone || phoneError) {  // UPDATED: Include phoneError check
+            setError('Please enter a valid phone number.');
             return;
         }
         if (role === 'student' && !academicLevel) {
@@ -70,6 +87,7 @@ const CompleteGoogleRegistrationPage = () => {
                     role: 'teacher',
                     phone: phone,
                     bio: '', avatarS3Key: '', title: '', experience: '', qualifications: [],
+                    approved: false,
                 };
             }
 
@@ -99,6 +117,7 @@ const CompleteGoogleRegistrationPage = () => {
     }
 
     const formInputStyle = "w-full px-3 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--input))] rounded-md focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] disabled:opacity-50";
+    const formInputErrorStyle = phoneError ? 'border-red-500 focus:ring-red-500' : '';  // NEW: Error styling for phone
 
     return (
         <div className="w-full">
@@ -146,14 +165,25 @@ const CompleteGoogleRegistrationPage = () => {
 
                 <div>
                     <label htmlFor="phone" className="block mb-2 text-sm font-medium">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+91" value={phone} onChange={(e) => setPhone(e.target.value)} className={formInputStyle} required disabled={isLoading} />
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="Enter 10-digit phone number"  // UPDATED: Better placeholder
+                        value={phone} 
+                        onChange={handlePhoneChange}  // UPDATED: Use handler with validation
+                        className={`${formInputStyle} ${formInputErrorStyle}`}  // UPDATED: Add error style
+                        required 
+                        disabled={isLoading} 
+                    />
+                    {phoneError && <p className="text-sm text-red-500 mt-1">{phoneError}</p>}  
                 </div>
 
                 {error && <p className="text-sm text-center text-[rgb(var(--destructive))]">{error}</p>}
 
                 <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !!phoneError || (!phone)}  // UPDATED: Disable if phone invalid
                     className="w-full px-4 py-3 font-bold text-[rgb(var(--primary-foreground))] bg-[rgb(var(--primary))] rounded-md hover:opacity-90 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isLoading ? 'Saving...' : 'Complete Registration'}
