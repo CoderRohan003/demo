@@ -1,3 +1,5 @@
+// Batch Detail Page - app/(dashboard)/batch/[slug]/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,18 +10,10 @@ import { databases } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
 import {
-  CheckCircle,
-  Clock,
-  Users,
-  Award,
-  ArrowLeft,
-  Download,
-  Shield,
-  Zap,
-  BookOpen
+  CheckCircle, Clock, Users, Award, ArrowLeft, Download, Shield, Zap, BookOpen
 } from 'lucide-react';
 
-// Interfaces and Razorpay setup remain the same
+// --- Interfaces and Razorpay setup remain the same ---
 interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
@@ -54,7 +48,7 @@ const BatchDetailPage = () => {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { id } = params;
+  const { slug } = params; // --- FIX 1: Get 'slug' from params, not 'id' ---
 
   const [batch, setBatch] = useState<Batch | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,23 +57,38 @@ const BatchDetailPage = () => {
   const [paymentError, setPaymentError] = useState('');
 
   useEffect(() => {
-    if (!id || !user) return;
+    if (!slug || !user) return; // --- FIX 2: Depend on 'slug' ---
+    console.log(`Fetching batch with slug: "${slug}"`);
+
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const batchData = await databases.getDocument(
+        // --- FIX 3: Fetch the batch by its slug ---
+        const batchResponse = await databases.listDocuments(
           DATABASE_ID,
           BATCHES_COLLECTION_ID,
-          id as string
+          [
+            Query.equal('slug', slug as string),
+            Query.limit(1)
+          ]
         );
-        setBatch(batchData as unknown as Batch);
 
+        if (batchResponse.documents.length === 0) {
+          console.error("Batch not found for this slug.");
+          setBatch(null); // Explicitly set to null if not found
+          return;
+        }
+
+        const currentBatch = batchResponse.documents[0] as unknown as Batch;
+        setBatch(currentBatch);
+
+        // --- FIX 4: Use the found batch's ID to check for enrollment ---
         const enrollmentCheck = await databases.listDocuments(
           DATABASE_ID,
           ENROLLMENTS_COLLECTION_ID,
           [
             Query.equal('userId', user.$id),
-            Query.equal('batchId', id as string)
+            Query.equal('batchId', currentBatch.$id) // Use currentBatch.$id here
           ]
         );
         if (enrollmentCheck.documents.length > 0) {
@@ -92,9 +101,10 @@ const BatchDetailPage = () => {
       }
     };
     fetchData();
-  }, [id, user]);
+  }, [slug, user]); // --- FIX 5: Update the dependency array ---
 
   const handleBuyCourse = async () => {
+    // This function remains the same and will work correctly now
     if (!user || !batch) return;
     setIsProcessing(true);
     setPaymentError('');

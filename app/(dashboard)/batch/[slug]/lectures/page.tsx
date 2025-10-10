@@ -211,32 +211,62 @@ interface Lecture {
 }
 
 interface Batch {
-    name: string;
+  $id: string; // Keep the ID for fetching lectures
+  name: string;
+  slug: string;
 }
 
 const BatchLecturesPage = () => {
   const { selectedDate } = useDate();
   const params = useParams();
-  const { id: batchId } = params;
+  const { id: batchId, slug } = params as { id?: string; slug?: string }; // Extract slug
   const { user } = useAuth();
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [batch, setBatch] = useState<Batch | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [completedLectures, setCompletedLectures] = useState<string[]>([]);
 
+  // --- OPTIMIZATION 1: Fetch batch details and enrollment only once ---
   useEffect(() => {
-    if (!batchId || !user) return;
+    if (!slug || !user) return;
 
-    const fetchBatchDetails = async () => {
-        try {
-            const batchData = await databases.getDocument(DATABASE_ID, BATCHES_COLLECTION_ID, batchId as string);
-            setBatch({ name: batchData.name } as Batch);
-        } catch (error) {
-            console.error("Failed to fetch batch details:", error);
+    const fetchBatchAndEnrollment = async () => {
+      try {
+        // Fetch batch details using the slug
+        const batchResponse = await databases.listDocuments(
+          DATABASE_ID, BATCHES_COLLECTION_ID, [Query.equal('slug', slug as string), Query.limit(1)]
+        );
+
+        if (batchResponse.documents.length === 0) {
+          console.error("Batch not found for this slug.");
+          return;
         }
+        const currentBatch = batchResponse.documents[0] as unknown as Batch;
+        setBatch(currentBatch);
+
+        // Fetch the user's progress for this batch
+        const enrollmentResponse = await databases.listDocuments(
+          DATABASE_ID, ENROLLMENTS_COLLECTION_ID, [
+          Query.equal('userId', user.$id),
+          Query.equal('batchId', currentBatch.$id), // Use the fetched batch ID
+        ]
+        );
+        if (enrollmentResponse.documents.length > 0) {
+          setCompletedLectures(enrollmentResponse.documents[0].completedLectures || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch batch details:", error);
+      }
     };
 
-    const fetchLecturesAndTeachers = async () => {
+    fetchBatchAndEnrollment();
+  }, [slug, user]); // This hook runs only when the slug or user changes
+
+  // --- OPTIMIZATION 2: Fetch lectures only when the date or batch changes ---
+  useEffect(() => {
+    if (!batch) return; // Don't run until the batch is loaded
+
+    const fetchLecturesForDate = async () => {
       setIsLoading(true);
       try {
         const startOfDay = new Date(selectedDate);
@@ -244,50 +274,30 @@ const BatchLecturesPage = () => {
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
 
+        // Fetch lectures for the specific batch and date
         const lectureResponse = await databases.listDocuments(
-          DATABASE_ID,
-          LECTURES_COLLECTION_ID,
-          [
-            Query.equal('batchId', batchId as string),
-            Query.greaterThanEqual('lectureDate', startOfDay.toISOString()),
-            Query.lessThanEqual('lectureDate', endOfDay.toISOString())
-          ]
+          DATABASE_ID, LECTURES_COLLECTION_ID, [
+          Query.equal('batchId', batch.$id), // Use the loaded batch's ID
+          Query.greaterThanEqual('lectureDate', startOfDay.toISOString()),
+          Query.lessThanEqual('lectureDate', endOfDay.toISOString())
+        ]
         );
-
-        const enrollmentResponse = await databases.listDocuments(
-          DATABASE_ID,
-          ENROLLMENTS_COLLECTION_ID,
-          [
-            Query.equal('userId', user.$id),
-            Query.equal('batchId', batchId as string),
-          ]
-        );
-        if (enrollmentResponse.documents.length > 0) {
-          setCompletedLectures(enrollmentResponse.documents[0].completedLectures || []);
-        }
 
         if (lectureResponse.documents.length === 0) {
           setLectures([]);
-          setIsLoading(false);
           return;
         }
 
+        // --- This logic for enriching with teacher data is excellent, no changes needed ---
         const teacherIds = [...new Set(lectureResponse.documents.map(doc => doc.uploaderId))];
-
         const profileResponse = await databases.listDocuments(
-          DATABASE_ID,
-          PROFILES_COLLECTION_ID,
-          [Query.equal('userId', teacherIds)]
+          DATABASE_ID, PROFILES_COLLECTION_ID, [Query.equal('userId', teacherIds)]
         );
-
         const teacherProfiles = new Map(profileResponse.documents.map(p => [p.userId, p]));
+
         const enrichedLectures = lectureResponse.documents.map(doc => {
           const teacher = teacherProfiles.get(doc.uploaderId);
-
-          const teacherImage = teacher?.avatarS3Key
-            ? `/api/avatar-view?s3Key=${teacher.avatarS3Key}`
-            : '/no-dp.png';
-
+          const teacherImage = teacher?.avatarS3Key ? `/api/avatar-view?s3Key=${teacher.avatarS3Key}` : '/no-dp.png';
           return {
             $id: doc.$id,
             title: doc.title,
@@ -297,19 +307,17 @@ const BatchLecturesPage = () => {
             teacherImage: teacherImage,
           } as Lecture;
         });
-
         setLectures(enrichedLectures);
-
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch lectures:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchBatchDetails();
-    fetchLecturesAndTeachers();
-  }, [selectedDate, batchId, user]);
+    fetchLecturesForDate();
+  }, [selectedDate, batch]); // This hook runs only when the date or batch changes
+
 
   const completedCount = completedLectures.length;
   const totalLectures = lectures.length;
@@ -329,9 +337,9 @@ const BatchLecturesPage = () => {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     } else {
-      return date.toLocaleDateString('en-US', { 
+      return date.toLocaleDateString('en-US', {
         weekday: 'long',
-        month: 'long', 
+        month: 'long',
         day: 'numeric',
         year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
       });
@@ -368,14 +376,14 @@ const BatchLecturesPage = () => {
           <CalendarDays className="w-4 h-4 text-white" />
         </div>
       </div>
-      
+
       <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
         No Classes Today
       </h3>
       <p className="text-gray-600 dark:text-gray-400 text-center max-w-md leading-relaxed">
         Looks like you have a free day! No lectures are scheduled for {formatDate(selectedDate)} in {batch?.name || 'this batch'}.
       </p>
-      
+
       <div className="mt-8 flex items-center space-x-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-200 dark:border-blue-800">
         <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
         <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
@@ -389,7 +397,7 @@ const BatchLecturesPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-gray-900 dark:via-blue-950/20 dark:to-indigo-950/20">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.1)_1px,transparent_0)] [background-size:20px_20px] pointer-events-none"></div>
-      
+
       <div className="relative w-full max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="mb-12">
@@ -407,7 +415,7 @@ const BatchLecturesPage = () => {
               <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent mb-3 leading-tight">
                 {formatDate(selectedDate)}
               </h1>
-              
+
             </div>
 
             {/* Stats Cards */}
@@ -460,7 +468,7 @@ const BatchLecturesPage = () => {
                 </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-lg"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
@@ -476,10 +484,10 @@ const BatchLecturesPage = () => {
           ) : lectures.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {lectures.map((lecture, index) => (
-                <div 
+                <div
                   key={lecture.$id}
                   className="transform hover:scale-105 transition-all duration-300"
-                  style={{ 
+                  style={{
                     animationDelay: `${index * 100}ms`,
                     animation: 'fadeInUp 0.6s ease-out forwards'
                   }}

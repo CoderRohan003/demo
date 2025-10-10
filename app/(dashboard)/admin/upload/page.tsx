@@ -301,7 +301,7 @@
 
 
 
-
+// app/(dashboard)/admin/upload/page.tsx
 
 'use client';
 
@@ -309,7 +309,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import withAdminAuth from '@/app/components/auth/withAdminAuth';
 import { databases } from '@/lib/appwrite';
-import { ID } from 'appwrite';
+import { ID, Query } from 'appwrite';
 import { useAuth } from '@/context/AuthContext';
 import {
   PlusCircle,
@@ -371,16 +371,29 @@ const UploadPage = () => {
   const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
+    // --- KEY IMPROVEMENT: Fetch only the batches assigned to the current teacher ---
     const fetchBatches = async () => {
+      if (!user) return; // Don't fetch if user is not loaded yet
+
       try {
-        const response = await databases.listDocuments(DATABASE_ID, BATCHES_COLLECTION_ID);
+        // This assumes you have a 'teacherIds' attribute on your Batches collection
+        // that stores the User ID of the teacher assigned to that batch.
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          BATCHES_COLLECTION_ID,
+          [
+            Query.contains('teacherIds', user.$id)
+          ]
+        );
         setAllBatches(response.documents as unknown as Batch[]);
       } catch (error) {
-        console.error("Failed to fetch batches:", error);
+        console.error("Failed to fetch teacher's batches:", error);
+        showToastNotification('error', 'Could not load your batches.');
       }
     };
     fetchBatches();
-  }, []);
+  }, [user]); // Dependency on 'user' ensures it runs after user is authenticated
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -833,8 +846,8 @@ const UploadPage = () => {
                 type="submit"
                 disabled={isLoading || successMessage !== '' || !isFormComplete}
                 className={`w-full flex items-center justify-center space-x-3 px-8 py-4 text-lg font-bold rounded-2xl transition-all duration-300 transform ${isFormComplete && !isLoading && !successMessage
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   }`}
               >
                 {isLoading ? (
@@ -863,12 +876,12 @@ const UploadPage = () => {
           <div className={`fixed top-6 right-6 z-50 transform transition-all duration-300 ${showToast ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
             }`}>
             <div className={`flex items-center space-x-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md border min-w-96 ${toastType === 'success'
-                ? 'bg-green-50/90 dark:bg-green-900/80 border-green-200 dark:border-green-700'
-                : 'bg-red-50/90 dark:bg-red-900/80 border-red-200 dark:border-red-700'
+              ? 'bg-green-50/90 dark:bg-green-900/80 border-green-200 dark:border-green-700'
+              : 'bg-red-50/90 dark:bg-red-900/80 border-red-200 dark:border-red-700'
               }`}>
               <div className={`p-2 rounded-full ${toastType === 'success'
-                  ? 'bg-green-500'
-                  : 'bg-red-500'
+                ? 'bg-green-500'
+                : 'bg-red-500'
                 }`}>
                 {toastType === 'success' ? (
                   <CheckCircle className="w-5 h-5 text-white" />
@@ -879,14 +892,14 @@ const UploadPage = () => {
 
               <div className="flex-1">
                 <p className={`font-semibold ${toastType === 'success'
-                    ? 'text-green-800 dark:text-green-200'
-                    : 'text-red-800 dark:text-red-200'
+                  ? 'text-green-800 dark:text-green-200'
+                  : 'text-red-800 dark:text-red-200'
                   }`}>
                   {toastType === 'success' ? 'Success!' : 'Error!'}
                 </p>
                 <p className={`text-sm ${toastType === 'success'
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-red-700 dark:text-red-300'
+                  ? 'text-green-700 dark:text-green-300'
+                  : 'text-red-700 dark:text-red-300'
                   }`}>
                   {toastMessage}
                 </p>
@@ -895,8 +908,8 @@ const UploadPage = () => {
               <button
                 onClick={hideToast}
                 className={`p-1 rounded-lg transition-colors ${toastType === 'success'
-                    ? 'hover:bg-green-200 dark:hover:bg-green-800 text-green-600 dark:text-green-400'
-                    : 'hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-400'
+                  ? 'hover:bg-green-200 dark:hover:bg-green-800 text-green-600 dark:text-green-400'
+                  : 'hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-400'
                   }`}
               >
                 <X className="w-4 h-4" />

@@ -87,6 +87,7 @@ import {
 
 interface Batch {
     $id: string;
+    slug: string;   
     name: string;
     description: string;
     imageUrl?: string;
@@ -99,7 +100,7 @@ const BatchCard = ({ batch }: { batch: Batch }) => {
     const [isLiked, setIsLiked] = useState(false);
 
     return (
-        <Link href={`/batch/${batch.$id}`} className="block">
+        <Link href={`/batch/${batch.slug}`} className="block">
             <div
                 className="group relative rounded-3xl overflow-hidden bg-white dark:bg-gray-800 shadow-xl hover:shadow-2xl transition-all duration-700 ease-out hover:-translate-y-3 hover:scale-[1.02] cursor-pointer"
                 onMouseEnter={() => setIsHovered(true)}

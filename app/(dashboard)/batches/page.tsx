@@ -66,7 +66,7 @@
 //       ) : enrolledBatches.length > 0 ? (
 //         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 //           {enrolledBatches.map(batch => (
-//             <Link key={batch.$id} href={`/batch/${batch.$id}/lectures`} className="block bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700">
+//             <Link key={batch.$slug} href={`/batch/${batch.$slug}/lectures`} className="block bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700">
 //               <div className="h-40 bg-gray-200 dark:bg-gray-700 relative">
 //                 <Image src={batch.imageUrl ? `/api/super-admin/batch-image-view?s3Key=${batch.imageUrl}` : '/no-dp.png'} alt={batch.name} layout="fill" objectFit="cover" />
 //               </div>
@@ -108,6 +108,7 @@ const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_C
 
 interface Batch {
   $id: string;
+  slug: string;
   name: string;
   imageUrl?: string;
 }
@@ -244,7 +245,7 @@ const MyBatchesPage = () => {
             {enrolledBatches.map((batch, index) => (
               <Link 
                 key={batch.$id} 
-                href={`/batch/${batch.$id}/lectures`}
+                href={`/batch/${batch.slug}/lectures`}
                 className="group relative transform transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
