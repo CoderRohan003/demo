@@ -13,6 +13,7 @@ const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 
 interface Batch {
   $id: string;
+  slug: string;
   name: string;
   description: string;
   imageUrl?: string;
