@@ -102,7 +102,10 @@ import withAuth from "@/app/components/auth/withAuth";
 import { databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import BatchCard from "@/app/components/BatchCard";
-import { GraduationCap, BookOpen, Users, Star, Search } from "lucide-react";
+import { GraduationCap, BookOpen, Users, Star, Search, ShieldAlert } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { FullPageLoader } from "@/app/components/FullPageLoader";
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
@@ -197,38 +200,84 @@ const StatsCard = ({ icon: Icon, title, value, gradient }: {
   </div>
 );
 
+const AccessDenied = () => (
+    <div className="col-span-full flex flex-col items-center justify-center py-20 px-6">
+        <div className="relative mb-8">
+            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20 rounded-full flex items-center justify-center">
+                <ShieldAlert className="w-16 h-16 text-red-500 dark:text-red-400" />
+            </div>
+        </div>
+        <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Access Denied
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 text-center max-w-md leading-relaxed">
+            You do not have permission to view the batches for this class.
+        </p>
+    </div>
+);
+
+
 const ClassPage = () => {
   const params = useParams();
-  const { classId } = params;
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+    const router = useRouter();
+    const { classId } = params;
+    // --- NEW: Get student profile and auth loading state ---
+    const { profile, isLoading: isAuthLoading } = useAuth();
+  
+    const [batches, setBatches] = useState<Batch[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    // --- NEW: State to manage access control ---
+    const [accessGranted, setAccessGranted] = useState(false);
+
 
   // Convert classId to string for proper handling
   const classNumber = Array.isArray(classId) ? classId[0] : classId;
 
-  useEffect(() => {
-    if (!classNumber) return;
-    const fetchBatches = async () => {
-      setIsLoading(true);
-      try {
-        const response = await databases.listDocuments(
-          DATABASE_ID,
-          BATCHES_COLLECTION_ID,
-          [
-            Query.equal("category", "Academic"), 
-            Query.equal("targetClasses", Number(classNumber))
-          ]
-        );
-        setBatches(response.documents as unknown as Batch[]);
-      } catch (error) {
-        console.error("Failed to fetch batches:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBatches();
-  }, [classNumber]);
+      useEffect(() => {
+        // Wait for profile to be loaded
+        if (isAuthLoading || !profile) return;
+
+        // --- SECURITY CHECK ---
+        // Grant access if the user is a teacher/admin, OR if they are a student in the correct class.
+        if (
+            profile.role !== 'student' ||
+            (profile.role === 'student' && Number(profile.academicLevel) === Number(classNumber))
+        ) {
+            setAccessGranted(true);
+            const fetchBatches = async () => {
+                setIsLoading(true);
+                try {
+                    const response = await databases.listDocuments(
+                        DATABASE_ID,
+                        BATCHES_COLLECTION_ID,
+                        [
+                            Query.equal("category", "Academic"),
+                            Query.equal("targetClasses", Number(classNumber))
+                        ]
+                    );
+                    setBatches(response.documents as unknown as Batch[]);
+                } catch (error) {
+                    console.error("Failed to fetch batches:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchBatches();
+        } else {
+            // If the check fails, deny access.
+            setAccessGranted(false);
+            setIsLoading(false);
+        }
+    }, [classNumber, profile, isAuthLoading]);
+
+    if (isAuthLoading) {
+        return <FullPageLoader />;
+    }
+
+    if (!accessGranted) {
+        return <div className="container mx-auto"><AccessDenied /></div>;
+    }
 
   // Filter batches based on search term
   const filteredBatches = batches.filter(batch =>

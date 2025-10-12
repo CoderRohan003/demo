@@ -42,12 +42,13 @@ const ENROLLMENTS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ENROLLMENTS_C
 interface Batch {
   $id: string; name: string; description: string; imageUrl?: string; price: number;
   faculty: string[]; features: string[]; duration: string;
+  category: string; targetClasses?: number[];
 }
 
 const BatchDetailPage = () => {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile, isLoading: isAuthLoading } = useAuth();
   const { slug } = params; // --- FIX 1: Get 'slug' from params, not 'id' ---
 
   const [batch, setBatch] = useState<Batch | null>(null);
@@ -57,42 +58,50 @@ const BatchDetailPage = () => {
   const [paymentError, setPaymentError] = useState('');
 
   useEffect(() => {
-    if (!slug || !user) return; // --- FIX 2: Depend on 'slug' ---
-    console.log(`Fetching batch with slug: "${slug}"`);
+    // This guard now correctly waits until authentication is fully resolved
+    if (!slug || isAuthLoading || !user || !profile) {
+        return;
+    }
 
     const fetchData = async () => {
+      // We start loading only after the initial checks have passed.
       setIsLoading(true);
       try {
-        // --- FIX 3: Fetch the batch by its slug ---
         const batchResponse = await databases.listDocuments(
           DATABASE_ID,
           BATCHES_COLLECTION_ID,
-          [
-            Query.equal('slug', slug as string),
-            Query.limit(1)
-          ]
+          [Query.equal('slug', slug as string), Query.limit(1)]
         );
 
         if (batchResponse.documents.length === 0) {
           console.error("Batch not found for this slug.");
-          setBatch(null); // Explicitly set to null if not found
+          router.replace('/home');
           return;
         }
 
         const currentBatch = batchResponse.documents[0] as unknown as Batch;
         setBatch(currentBatch);
 
-        // --- FIX 4: Use the found batch's ID to check for enrollment ---
         const enrollmentCheck = await databases.listDocuments(
           DATABASE_ID,
           ENROLLMENTS_COLLECTION_ID,
-          [
-            Query.equal('userId', user.$id),
-            Query.equal('batchId', currentBatch.$id) // Use currentBatch.$id here
-          ]
+          [Query.equal('userId', user.$id), Query.equal('batchId', currentBatch.$id)]
         );
+
         if (enrollmentCheck.documents.length > 0) {
           setIsEnrolled(true);
+        } else {
+          // This security check now runs with the correct, fully-loaded profile.
+          if (
+            profile.role === 'student' &&
+            currentBatch.category === 'Academic' &&
+            currentBatch.targetClasses &&
+            !currentBatch.targetClasses.includes(Number(profile.academicLevel))
+          ) {
+              console.warn("Access Denied: Student's class does not match batch's target classes.");
+              router.replace('/home');
+              return;
+          }
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -101,10 +110,12 @@ const BatchDetailPage = () => {
       }
     };
     fetchData();
-  }, [slug, user]); // --- FIX 5: Update the dependency array ---
+  // --- THE FIX ---
+  // The dependency array MUST include all external variables used inside the effect.
+  }, [slug, user, profile, isAuthLoading, router]);
 
   const handleBuyCourse = async () => {
-    // This function remains the same and will work correctly now
+    // No changes needed here
     if (!user || !batch) return;
     setIsProcessing(true);
     setPaymentError('');
@@ -128,7 +139,7 @@ const BatchDetailPage = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <div className="text-center">
@@ -146,12 +157,11 @@ const BatchDetailPage = () => {
           <div className="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-12 h-12 text-red-500" />
           </div>
-          <p className="text-xl font-medium text-gray-600 dark:text-gray-300">Course not found.</p>
+          <p className="text-xl font-medium text-gray-600 dark:text-gray-300">Course not found or access denied.</p>
         </div>
       </div>
     );
   }
-
   return (
     // The root div no longer has min-h-screen, allowing the main layout to control scrolling
     <div className="bg-gray-50 dark:bg-gray-900">

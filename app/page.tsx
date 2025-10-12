@@ -14,6 +14,7 @@ import {
   Video,
 } from "lucide-react";
 import { Client, Databases, Models } from "appwrite";
+import { FullPageLoader } from "./components/FullPageLoader";
 
 // This client is still needed to fetch public course data for the landing page
 const client = new Client();
@@ -25,11 +26,11 @@ const databases = new Databases(client);
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
+const WEBSITE_VERSION = "1.1.0"; 
 
 // Images
 import schoolLogo from "@/public/logo.webp";
 import miseLogo from "@/public/miselogo.png";
-import { FullPageLoader } from "./components/FullPageLoader";
 
 const backgroundImages = [
   "/MISE/image1.JPG",
@@ -53,6 +54,15 @@ interface BatchDocument extends Models.Document {
   description: string;
   icon?: string;
 }
+
+// --- NEW: Helper function to truncate text ---
+const truncateWords = (text: string, limit: number) => {
+  const words = text.split(" ");
+  if (words.length > limit) {
+    return words.slice(0, limit).join(" ") + "...";
+  }
+  return text;
+};
 
 export default function LandingPage() {
   const { profile, isLoading: isAuthLoading } = useAuth();
@@ -82,7 +92,7 @@ export default function LandingPage() {
         const coursesData: Course[] = response.documents.map((doc) => ({
           id: doc.$id,
           name: doc.name ?? "Untitled",
-          description: doc.description ?? "",
+          description: doc.description ?? "No description available.", // Ensure description has a fallback
           icon: doc.icon ?? "Book",
         }));
         setCourses(coursesData);
@@ -105,15 +115,15 @@ export default function LandingPage() {
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
       case "BookOpen":
-        return <BookOpen size={40} className="text-blue-600 dark:text-blue-400 mb-2" />;
+        return <BookOpen size={40} className="text-blue-600 dark:text-blue-400 mb-4" />;
       case "GraduationCap":
-        return <GraduationCap size={40} className="text-blue-600 dark:text-blue-400 mb-2" />;
+        return <GraduationCap size={40} className="text-blue-600 dark:text-blue-400 mb-4" />;
       case "Users":
-        return <Users size={40} className="text-blue-600 dark:text-blue-400 mb-2" />;
+        return <Users size={40} className="text-blue-600 dark:text-blue-400 mb-4" />;
       case "Video":
-        return <Video size={40} className="text-blue-600 dark:text-blue-400 mb-2" />;
+        return <Video size={40} className="text-blue-600 dark:text-blue-400 mb-4" />;
       default:
-        return <Book size={40} className="text-blue-600 dark:text-blue-400 mb-2" />;
+        return <Book size={40} className="text-blue-600 dark:text-blue-400 mb-4" />;
     }
   };
 
@@ -127,20 +137,19 @@ export default function LandingPage() {
       <section className="relative min-h-screen overflow-hidden bg-gray-900">
         {/* Background Carousel */}
         <div className="absolute inset-0 z-0">
-  {backgroundImages.map((src, index) => (
-    <Image
-      key={index}
-      src={src}
-      alt={`School campus ${index + 1}`}
-      fill
-      priority={index === 0}
-      className={`absolute inset-0 object-cover transition-opacity duration-1000 ${
-        index === currentBg ? "opacity-30" : "opacity-0"
-      }`}
-    />
-  ))}
-</div>
-
+          {backgroundImages.map((src, index) => (
+            <Image
+              key={index}
+              src={src}
+              alt={`School campus ${index + 1}`}
+              fill
+              priority={index === 0}
+              className={`absolute inset-0 object-cover transition-opacity duration-1000 ${
+                index === currentBg ? "opacity-30" : "opacity-0"
+              }`}
+            />
+          ))}
+        </div>
 
         {/* Foreground Content */}
         <div className="relative z-10 p-4 flex flex-col min-h-screen">
@@ -198,20 +207,79 @@ export default function LandingPage() {
       </section>
 
       {/* ========== COURSES ========== */}
-      <section className="max-w-full mx-auto py-16 bg-gray-50 dark:bg-gray-900">
+       <section className="max-w-full mx-auto py-16 bg-gray-50 dark:bg-gray-900">
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">Our Courses</h2>
         {loadingCourses ? (
-          <p className="text-center text-gray-600 dark:text-gray-400">Loading courses...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-center text-gray-600 dark:text-gray-400 text-lg">Loading courses...</p>
+          </div>
         ) : (
-          <div className="relative overflow-hidden w-full">
-            <div className="flex gap-6 pb-4 pt-2 whitespace-nowrap animate-scrolling" style={{ display: "inline-flex", animationDuration: `${courses.length * 5}s` }}>
+          <div className="relative overflow-hidden w-full group">
+            <style jsx>{`
+              @keyframes scroll {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .animate-scrolling {
+                animation: scroll linear infinite;
+              }
+              .group:hover .animate-scrolling {
+                animation-play-state: paused;
+              }
+              .card-gradient {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              }
+            `}</style>
+            
+            <div 
+              className="flex gap-8 pb-6 pt-4 animate-scrolling" 
+              style={{ 
+                display: "inline-flex",
+                animationDuration: `${courses.length * 6}s`
+              }}
+            >
               {courses.concat(courses).map((course, index) => (
-                <div key={`${course.id}-${index}`} className="flex-shrink-0 w-80">
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center h-full flex flex-col items-center justify-center">
-                    {getIconComponent(course.icon)}
-                    <h3 className="font-semibold text-xl my-2 text-gray-900 dark:text-white">{course.name}</h3>
+                <a 
+                  href="/login" 
+                  key={`${course.id}-${index}`} 
+                  className="flex-shrink-0 w-96 group/card cursor-pointer"
+                >
+                  <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden h-full transition-all duration-300 group-hover/card:shadow-2xl group-hover/card:-translate-y-2 border border-gray-200 dark:border-gray-700">
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover/card:from-blue-500/5 group-hover/card:to-purple-500/5 transition-all duration-300"></div>
+                    
+                    {/* Content */}
+                    <div className="relative p-8 flex flex-col items-center text-center h-full">
+                      {/* Icon container with animated background */}
+                      {/* <div className="relative mb-4">
+                        <div className="absolute inset-0 bg-blue-500 rounded-full opacity-10 group-hover/card:opacity-20 transition-opacity blur-xl"></div>
+                        <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-2xl group-hover/card:scale-110 transition-transform duration-300">
+                          {getIconComponent(course.icon)}
+                        </div>
+                      </div> */}
+                      
+                      <h3 className="font-bold text-2xl mb-3 text-gray-900 dark:text-white group-hover/card:text-blue-600 dark:group-hover/card:text-blue-400 transition-colors">
+                        {course.name}
+                      </h3>
+                      <br />
+                      <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 h-20 overflow-y-visible mb-4">
+                        {truncateWords(course.description, 20)}
+                      </p>
+                      
+                      {/* Hover indicator */}
+                      <div className="mt-auto pt-1 flex items-center gap-2 text-blue-600 dark:text-blue-400 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-semibold">Learn More</span>
+                        <svg className="w-4 h-1 group-hover/card:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    {/* Bottom accent line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform scale-x-0 group-hover/card:scale-x-100 transition-transform duration-300"></div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -220,8 +288,12 @@ export default function LandingPage() {
 
       {/* ========== FOOTER ========== */}
       <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm bg-white dark:bg-gray-900">
-        © 2025 MISE.org.in {"   "} All rights reserved.
+        © {new Date().getFullYear()} MISE.org.in {"  "} All rights reserved.
       </footer>
+      {/* --- MODIFICATION: Added version number below footer --- */}
+      <div className="text-center pb-4 text-xs text-gray-500 dark:text-gray-500 bg-white dark:bg-gray-900">
+        Version {WEBSITE_VERSION}
+      </div>
     </div>
   );
 }
