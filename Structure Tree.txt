@@ -1,0 +1,131 @@
+Folder map of d:\Programing\Next Js\Private\onlinelearningplatform\app
+==================================================
+
+├── (auth)/
+│   ├── forgot-password/
+│   │   └── page.tsx
+│   ├── google-register/
+│   │   └── page.tsx
+│   ├── login/
+│   │   └── page.tsx
+│   ├── register/
+│   │   └── page.tsx
+│   ├── reset-password/
+│   │   └── page.tsx
+│   └── layout.tsx
+├── (dashboard)/
+│   ├── admin/
+│   │   ├── create-test/
+│   │   │   └── page.tsx
+│   │   ├── tests/
+│   │   │   ├── review/
+│   │   │   │   ├── [testId]/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── submission/
+│   │   │   │       └── [submissionId]/
+│   │   │   │           └── page.tsx
+│   │   │   └── page.tsx
+│   │   └── upload/
+│   │       └── page.tsx  ✔️
+│   ├── announcements/
+│   │   └── page.tsx  ✔️
+│   ├── batch/
+│   │   └── [id]/
+│   │       ├── lectures/
+│   │       │   └── page.tsx ✔️
+│   │       └── page.tsx  ✔️
+│   ├── batches/
+│   │   └── page.tsx  ✔️
+│   ├── class/
+│   │   └── [classId]/
+│   │       └── page.tsx  ✔️
+│   ├── coding-ai/
+│   │   ├── [level]/
+│   │   │   └── page.tsx  ✔️
+│   │   └── page.tsx
+│   ├── home/
+│   │   └── page.tsx  ✔️
+│   ├── lecture/
+│   │   └── [id]/
+│   │       └── page.tsx  ✔️
+│   ├── library/
+│   │   └── page.tsx  ✔️
+│   ├── profile/
+│   │   └── page.tsx  ✔️
+│   ├── super-admin/
+│   │   ├── create-announcement/
+│   │   │   └── page.tsx  ✔️
+│   │   ├── create-batch/
+│   │   │   └── page.tsx  ✔️
+│   │   └── page.tsx  ✔️
+│   ├── tests/
+│   │   ├── results/
+│   │   │   └── [submissionId]/
+│   │   │       └── page.tsx
+│   │   ├── take/
+│   │   │   └── [testId]/
+│   │   │       └── page.tsx
+│   │   └── page.tsx
+│   └── layout.tsx
+├── api/
+│   ├── announcements/
+│   │   └── route.ts
+│   ├── avatar-upload/
+│   │   └── route.ts
+│   ├── avatar-view/
+│   │   └── route.ts
+│   ├── notifications/
+│   │   └── route.ts
+│   ├── resources/
+│   │   ├── upload/
+│   │   │   └── route.ts
+│   │   └── view/
+│   │       └── route.ts
+│   ├── super-admin/
+│   │   ├── batch-image-upload/
+│   │   │   └── route.ts
+│   │   ├── batch-image-view/
+│   │   │   └── route.ts
+│   │   ├── batches/
+│   │   │   └── route.ts
+│   │   ├── dashboard/
+│   │   │   └── route.ts
+│   │   └── users/
+│   │       └── route.ts
+│   ├── tests/
+│   │   ├── calculate-score/
+│   │   │   └── route.ts
+│   │   ├── submissions/
+│   │   │   └── route.ts
+│   │   └── route.ts
+│   ├── upload/
+│   │   └── route.ts
+│   └── view/
+│       └── route.ts
+├── components/
+│   ├── auth/
+│   │   ├── withAdminAuth.tsx
+│   │   ├── withAuth.tsx
+│   │   └── withSuperAdminAuth.tsx
+│   ├── profiles/
+│   │   ├── StudentProfile.tsx
+│   │   ├── SuperAdminProfile.tsx
+│   │   └── TeacherProfile.tsx
+│   ├── ui/
+│   │   ├── button.tsx
+│   │   └── dropdown-menu.tsx
+│   ├── BatchCard.tsx  ✔️
+│   ├── DateSlider.tsx
+│   ├── FullPageLoader.tsx  ✔️
+│   ├── FullPageLoader2.tsx
+│   ├── LectureCard.tsx  ✔️
+│   ├── Navbar.tsx
+│   ├── ProctoringSetup.tsx
+│   ├── Sidebar.tsx  ✔️
+│   ├── ThemeToggleButton.tsx  ✔️
+│   └── ThemeToggleButtonMobile.tsx  ✔️
+├── favicon.ico
+├── globals.css
+├── layout.tsx
+├── module.themetoggle.css
+└── page.tsx

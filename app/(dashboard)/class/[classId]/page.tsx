@@ -253,7 +253,7 @@ const ClassPage = () => {
                         BATCHES_COLLECTION_ID,
                         [
                             Query.equal("category", "Academic"),
-                            Query.equal("targetClasses", Number(classNumber))
+                            Query.contains("targetClasses", Number(classNumber))
                         ]
                     );
                     setBatches(response.documents as unknown as Batch[]);

@@ -26,7 +26,7 @@ interface BatchData {
     subjects: string[];
     faculty: string[];
     features: string[];
-    teacherIds: string[]; // Crucial field for assigning a teacher
+    teacherIds: string[];
     targetClasses?: number[];
     level?: string;
 }
@@ -36,7 +36,6 @@ const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const BATCHES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_BATCHES_ID!;
 const TEACHER_PROFILES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_TEACHER_PROFILES_COLLECTION_ID!;
 
-
 const CreateBatchPage = () => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -44,10 +43,9 @@ const CreateBatchPage = () => {
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
     const [unselectedTeachers, setUnselectedTeachers] = useState<Teacher[]>([]);
 
-    // --- Consolidated formData state ---
     const [formData, setFormData] = useState({
         name: '',
-        slug: '', // Manual slug input
+        slug: '',
         description: '',
         price: 0,
         category: 'Academic',
@@ -55,7 +53,7 @@ const CreateBatchPage = () => {
         targetClasses: [] as number[],
         subjects: [] as string[],
         duration: '',
-        faculty: [] as string[],
+        // MODIFICATION: 'faculty' is no longer needed in the form state
         features: [] as string[],
         imageFile: null as File | null,
         teacherIds: [] as string[],
@@ -64,13 +62,12 @@ const CreateBatchPage = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [currentInput, setCurrentInput] = useState({
         subject: '',
-        faculty: '',
+        // MODIFICATION: 'faculty' input is removed
         feature: ''
     });
 
     const availableClasses = [6, 7, 8, 9, 10, 11, 12];
 
-    // --- Fetch teachers when the component mounts ---
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
@@ -90,8 +87,6 @@ const CreateBatchPage = () => {
         fetchTeachers();
     }, []);
 
-    // --- MODIFIED: Simplified handleChange function ---
-    // The slug is now just a normal input field.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -100,12 +95,10 @@ const CreateBatchPage = () => {
         }));
     };
 
-    // --- NEW: Functions to handle multi-teacher selection ---
     const handleAddTeacher = (teacherId: string) => {
         if (teacherId && !formData.teacherIds.includes(teacherId)) {
             const newTeacherIds = [...formData.teacherIds, teacherId];
             setFormData(prev => ({ ...prev, teacherIds: newTeacherIds }));
-            // Update the list of unselected teachers
             setUnselectedTeachers(allTeachers.filter(t => !newTeacherIds.includes(t.userId)));
         }
     };
@@ -113,27 +106,26 @@ const CreateBatchPage = () => {
     const handleRemoveTeacher = (teacherIdToRemove: string) => {
         const newTeacherIds = formData.teacherIds.filter(id => id !== teacherIdToRemove);
         setFormData(prev => ({ ...prev, teacherIds: newTeacherIds }));
-        // Update the list of unselected teachers
         setUnselectedTeachers(allTeachers.filter(t => !newTeacherIds.includes(t.userId)));
     };
-
 
     const handleCurrentInputChange = (field: string, value: string) => {
         setCurrentInput(prev => ({ ...prev, [field]: value }));
     };
 
-    const addItem = (field: 'subjects' | 'faculty' | 'features', inputField: 'subject' | 'faculty' | 'feature') => {
+    // MODIFICATION: Removed 'faculty' from the generic types
+    const addItem = (field: 'subjects' | 'features', inputField: 'subject' | 'feature') => {
         const value = currentInput[inputField].trim();
-        if (value && !formData[field].includes(value)) {
+        if (value && !(formData[field] as string[]).includes(value)) {
             setFormData(prev => ({ ...prev, [field]: [...prev[field], value] }));
             setCurrentInput(prev => ({ ...prev, [inputField]: '' }));
         }
     };
 
-    const removeItem = (field: 'subjects' | 'faculty' | 'features', index: number) => {
+    const removeItem = (field: 'subjects' | 'features', index: number) => {
         setFormData(prev => ({
             ...prev,
-            [field]: prev[field].filter((_, i) => i !== index)
+            [field]: (prev[field] as string[]).filter((_, i) => i !== index)
         }));
     };
 
@@ -156,7 +148,6 @@ const CreateBatchPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (formData.teacherIds.length === 0) {
             setError("You must assign at least one teacher to the batch.");
             return;
@@ -165,12 +156,10 @@ const CreateBatchPage = () => {
             setError("Slug can only contain lowercase letters, numbers, and underscores (_).");
             return;
         }
-
         setIsLoading(true);
         setError('');
 
         try {
-            // ... (your image upload logic is correct and remains the same)
             let imageUrl = '';
             if (formData.imageFile) {
                 const presignRes = await fetch('/api/super-admin/batch-image-upload', {
@@ -184,17 +173,24 @@ const CreateBatchPage = () => {
                 imageUrl = key;
             }
 
+            // --- THE FIX IS HERE ---
+            // Automatically create the faculty list from the assigned teachers.
+            const facultyNames = formData.teacherIds.map(id => {
+                const teacher = allTeachers.find(t => t.userId === id);
+                return teacher ? teacher.name : '';
+            }).filter(Boolean); // Filter out any empty names just in case
+
             const finalBatchData: Partial<BatchData> = {
                 name: formData.name,
                 slug: formData.slug,
-                teacherIds: formData.teacherIds, // Pass the array of teacher IDs
+                teacherIds: formData.teacherIds,
                 description: formData.description,
                 price: formData.price,
                 category: formData.category,
                 duration: formData.duration,
                 imageUrl: imageUrl,
                 subjects: formData.subjects,
-                faculty: formData.faculty,
+                faculty: facultyNames, // Use the auto-generated list of names
                 features: formData.features,
             };
 
@@ -204,26 +200,22 @@ const CreateBatchPage = () => {
                 finalBatchData.level = formData.level;
             }
 
-            // ... (your fetch call to create the batch is correct)
             const createBatchRes = await fetch('/api/super-admin/batches', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalBatchData),
             });
             if (!createBatchRes.ok) {
-                const errorData = await createBatchRes.json();
-                throw new Error(errorData.error || 'Failed to create the batch.');
+                 const errorData = await createBatchRes.json();
+                 throw new Error(errorData.error || 'Failed to create the batch.');
             }
-
             router.push('/super-admin');
-
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred.');
         } finally {
             setIsLoading(false);
         }
     };
-
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
             <div className="max-w-3xl mx-auto">
@@ -439,44 +431,6 @@ const CreateBatchPage = () => {
                                                     type="button"
                                                     onClick={() => removeItem('subjects', index)}
                                                     className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                                                >
-                                                    ×
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Faculty */}
-                            <div>
-                                <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Faculty</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={currentInput.faculty}
-                                        onChange={(e) => handleCurrentInputChange('faculty', e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addItem('faculty', 'faculty'))}
-                                        placeholder="Enter faculty name"
-                                        className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => addItem('faculty', 'faculty')}
-                                        className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                                {formData.faculty.length > 0 && (
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {formData.faculty.map((member, index) => (
-                                            <span key={index} className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-base">
-                                                {member}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeItem('faculty', index)}
-                                                    className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200"
                                                 >
                                                     ×
                                                 </button>
